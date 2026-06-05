@@ -6,8 +6,8 @@
 ## Phase 0 foundation
 
 This repository currently contains the Next.js, TypeScript, Tailwind CSS,
-component, linting, formatting, environment, and Supabase browser-client
-foundation.
+component, linting, formatting, environment, Supabase browser-client foundation,
+and the Phase 1 app shell.
 
 ## Local setup
 
