@@ -2,6 +2,7 @@ import { Copy, Pencil, RefreshCcw } from "lucide-react";
 
 import { MarkdownMessage } from "@/components/markdown-message";
 import { Button } from "@/components/ui/button";
+import type { CurrentChat } from "@/types/chat";
 
 type AssistantMetadata = {
   modelId: "gpt-4o-2024-05-13" | "gpt-4o-2024-08-06" | "gpt-4o-2024-11-20";
@@ -195,7 +196,31 @@ const model = "gpt-4o-2024-05-13";
   },
 ];
 
-export function MessageList() {
+type MessageListProps = {
+  currentChat: CurrentChat | null;
+};
+
+export function MessageList({ currentChat }: MessageListProps) {
+  if (!currentChat) {
+    return (
+      <div
+        aria-label="No selected chat"
+        className="message-scrollbar min-h-0 flex-1 overflow-y-auto px-4 py-6 md:px-8"
+      >
+        <div className="mx-auto grid h-full w-full max-w-3xl place-items-center">
+          <div className="max-w-sm text-center">
+            <h1 className="text-xl font-semibold leading-8">
+              No chat selected
+            </h1>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+              Create a new chat or choose one from the sidebar.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       aria-label="メッセージ一覧"

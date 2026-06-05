@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 
 type ChatHeaderProps = {
   onMenuClick: () => void;
+  currentChatTitle: string | null;
 };
 
 const modelOptions = [
@@ -16,7 +17,7 @@ const modelOptions = [
   { label: "4o-1120", modelId: "gpt-4o-2024-11-20" },
 ] as const;
 
-export function ChatHeader({ onMenuClick }: ChatHeaderProps) {
+export function ChatHeader({ currentChatTitle, onMenuClick }: ChatHeaderProps) {
   const [modelMenuOpen, setModelMenuOpen] = useState(false);
   const [selectedModel, setSelectedModel] = useState<
     (typeof modelOptions)[number]
@@ -88,6 +89,11 @@ export function ChatHeader({ onMenuClick }: ChatHeaderProps) {
             ))}
           </div>
         ) : null}
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-medium text-foreground">
+            {currentChatTitle ?? "No chat selected"}
+          </p>
+        </div>
       </div>
     </header>
   );

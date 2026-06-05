@@ -1,7 +1,7 @@
 import { AppShell } from "@/components/app-shell";
 import { LoginPanel } from "@/components/auth/login-panel";
-import { getSupabasePublicConfig } from "@/lib/supabase/config";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getAuthenticatedAppContext } from "@/lib/auth";
+import { listVisibleChats } from "@/lib/chats";
 
 export const dynamic = "force-dynamic";
 
@@ -11,50 +11,20 @@ type HomeProps = {
   }>;
 };
 
-function getFallbackDisplayName(userId: string) {
-  return `User ${userId.slice(0, 8)}`;
-}
-
 export default async function Home({ searchParams }: HomeProps) {
   const params = await searchParams;
-  const supabaseConfigured = Boolean(getSupabasePublicConfig());
+  const auth = await getAuthenticatedAppContext();
 
-  if (!supabaseConfigured) {
+  if (auth.status !== "authenticated") {
     return (
       <LoginPanel
         authError={params.auth_error === "1"}
-        supabaseConfigured={false}
+        supabaseConfigured={auth.status !== "unconfigured"}
       />
     );
   }
 
-  const supabase = await createSupabaseServerClient();
-  const { data: claimsData, error: claimsError } =
-    await supabase.auth.getClaims();
+  const chats = await listVisibleChats(auth.supabase);
 
-  if (claimsError || !claimsData?.claims.sub) {
-    return (
-      <LoginPanel
-        authError={params.auth_error === "1"}
-        supabaseConfigured={true}
-      />
-    );
-  }
-
-  const userId = claimsData.claims.sub;
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("display_name, avatar_url")
-    .eq("id", userId)
-    .maybeSingle();
-
-  return (
-    <AppShell
-      profile={{
-        id: userId,
-        displayName: profile?.display_name ?? getFallbackDisplayName(userId),
-        avatarUrl: profile?.avatar_url ?? null,
-      }}
-    />
-  );
+  return <AppShell chats={chats} currentChat={null} profile={auth.profile} />;
 }

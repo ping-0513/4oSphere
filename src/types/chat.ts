@@ -36,6 +36,13 @@ export type ChatRow = {
   deleted_at: string | null;
 };
 
+export type ChatListItem = Pick<
+  ChatRow,
+  "id" | "title" | "created_at" | "updated_at" | "archived_at" | "deleted_at"
+>;
+
+export type CurrentChat = ChatListItem;
+
 export type MessageTurnRow = {
   id: string;
   chat_id: string;

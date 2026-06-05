@@ -8,25 +8,38 @@ import { ChatHeader } from "@/components/chat-header";
 import { MessageList } from "@/components/message-list";
 import { MobileDrawer } from "@/components/mobile-drawer";
 import type { AuthenticatedProfile } from "@/types/auth";
+import type { ChatListItem, CurrentChat } from "@/types/chat";
 
 type AppShellProps = {
+  chats: ChatListItem[];
+  currentChat: CurrentChat | null;
   profile: AuthenticatedProfile;
 };
 
-export function AppShell({ profile }: AppShellProps) {
+export function AppShell({ chats, currentChat, profile }: AppShellProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
     <main className="flex h-dvh min-h-dvh overflow-hidden bg-background text-foreground">
-      <AppSidebar className="hidden md:flex" profile={profile} />
+      <AppSidebar
+        chats={chats}
+        className="hidden md:flex"
+        currentChatId={currentChat?.id ?? null}
+        profile={profile}
+      />
       <MobileDrawer
-        open={drawerOpen}
+        chats={chats}
+        currentChatId={currentChat?.id ?? null}
         onOpenChange={setDrawerOpen}
+        open={drawerOpen}
         profile={profile}
       />
       <section className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <ChatHeader onMenuClick={() => setDrawerOpen(true)} />
-        <MessageList />
+        <ChatHeader
+          currentChatTitle={currentChat?.title ?? null}
+          onMenuClick={() => setDrawerOpen(true)}
+        />
+        <MessageList currentChat={currentChat} />
         <ChatComposer />
       </section>
     </main>

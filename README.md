@@ -6,8 +6,8 @@
 ## Phase 0 foundation
 
 This repository currently contains the Next.js, TypeScript, Tailwind CSS,
-component, linting, formatting, environment, Supabase Auth wiring, and the
-Phase 1 app shell.
+component, linting, formatting, environment, Supabase Auth wiring, chat routing,
+chat creation, chat list loading, and the Phase 1 app shell.
 
 ## Local setup
 
@@ -47,6 +47,17 @@ Google login also requires repo-external provider configuration:
 The app exchanges the OAuth callback code at `/auth/callback`, refreshes
 Supabase Auth cookies through the Next.js proxy, and upserts the signed-in user
 into the existing `profiles` table.
+
+## Chat routing
+
+Authenticated users can create chats from the sidebar. Each New chat action
+creates a new `chats` row and redirects to `/chat/{chatId}`. The root `/` route
+does not automatically open an existing chat.
+
+Chat lists and direct chat loads only read rows where `deleted_at is null`.
+Deleted chats are hidden from the list and direct deleted-chat URLs return the
+same not-found behavior as missing or inaccessible chats. Message persistence
+is deferred to a later phase.
 
 ## Verification
 
