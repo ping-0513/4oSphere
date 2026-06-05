@@ -1,0 +1,9 @@
+.agents/
+.next/
+coverage/
+node_modules/
+out/
+
+AGENTS.md
+docs/
+next-env.d.ts
