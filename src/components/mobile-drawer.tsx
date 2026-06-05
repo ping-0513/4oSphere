@@ -18,14 +18,14 @@ export function MobileDrawer({ open, onOpenChange }: MobileDrawerProps) {
         <Dialog.Overlay className="fixed inset-0 z-40 bg-background/70 backdrop-blur-sm md:hidden" />
         <Dialog.Content
           aria-describedby={undefined}
-          className="fixed inset-y-0 left-0 z-50 w-[min(84vw,20rem)] border-r border-border bg-card shadow-xl outline-none md:hidden"
+          className="fixed inset-y-0 left-0 z-50 max-h-dvh w-[min(88vw,20rem)] overflow-hidden rounded-r-3xl border-r border-border/70 bg-card/85 shadow-xl shadow-black/25 outline-none backdrop-blur md:hidden"
         >
-          <Dialog.Title className="sr-only">Navigation</Dialog.Title>
+          <Dialog.Title className="sr-only">ナビゲーション</Dialog.Title>
           <AppSidebar className="flex w-full border-r-0" />
           <Dialog.Close asChild>
             <Button
-              aria-label="Close navigation"
-              className="absolute right-3 top-3"
+              aria-label="ナビゲーションを閉じる"
+              className="absolute right-3 top-3 rounded-2xl"
               size="icon"
               variant="ghost"
             >

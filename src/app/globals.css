@@ -26,25 +26,25 @@
 }
 
 :root {
-  --radius: 0.5rem;
-  --background: oklch(0.13 0.016 250);
-  --foreground: oklch(0.96 0.012 165);
-  --card: oklch(0.17 0.018 250);
-  --card-foreground: oklch(0.96 0.012 165);
-  --popover: oklch(0.17 0.018 250);
-  --popover-foreground: oklch(0.96 0.012 165);
-  --primary: oklch(0.78 0.14 165);
-  --primary-foreground: oklch(0.12 0.014 250);
-  --secondary: oklch(0.23 0.022 250);
-  --secondary-foreground: oklch(0.93 0.012 165);
-  --muted: oklch(0.22 0.018 250);
-  --muted-foreground: oklch(0.7 0.035 175);
-  --accent: oklch(0.25 0.05 165);
-  --accent-foreground: oklch(0.95 0.018 165);
-  --destructive: oklch(0.58 0.22 25);
-  --border: oklch(0.28 0.02 250);
-  --input: oklch(0.28 0.02 250);
-  --ring: oklch(0.78 0.14 165);
+  --radius: 0.875rem;
+  --background: oklch(0.2 0.014 245);
+  --foreground: oklch(0.95 0.01 165);
+  --card: oklch(0.25 0.016 245);
+  --card-foreground: oklch(0.95 0.01 165);
+  --popover: oklch(0.27 0.016 245);
+  --popover-foreground: oklch(0.95 0.01 165);
+  --primary: oklch(0.76 0.105 165);
+  --primary-foreground: oklch(0.17 0.012 245);
+  --secondary: oklch(0.3 0.018 245);
+  --secondary-foreground: oklch(0.92 0.012 165);
+  --muted: oklch(0.31 0.014 245);
+  --muted-foreground: oklch(0.74 0.025 175);
+  --accent: oklch(0.36 0.044 165);
+  --accent-foreground: oklch(0.94 0.012 165);
+  --destructive: oklch(0.58 0.18 25);
+  --border: oklch(0.34 0.016 245);
+  --input: oklch(0.34 0.016 245);
+  --ring: oklch(0.72 0.095 165);
 }
 
 * {
@@ -66,4 +66,31 @@ body {
 button,
 textarea {
   font: inherit;
+}
+
+.message-scrollbar {
+  scrollbar-color: transparent transparent;
+  scrollbar-width: thin;
+}
+
+.message-scrollbar:hover {
+  scrollbar-color: color-mix(in oklch, var(--muted-foreground) 36%, transparent)
+    transparent;
+}
+
+.message-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.message-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.message-scrollbar::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 999px;
+}
+
+.message-scrollbar:hover::-webkit-scrollbar-thumb {
+  background: color-mix(in oklch, var(--muted-foreground) 28%, transparent);
 }

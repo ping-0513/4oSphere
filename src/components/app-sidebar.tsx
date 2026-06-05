@@ -11,17 +11,17 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const chatItems = [
-  "Current shell",
-  "Knowledge notes",
-  "Draft conversation",
-  "Mobile layout check",
+  "現在のシェル",
+  "ナレッジメモ",
+  "下書きチャット",
+  "モバイル表示確認",
 ];
 
 const navItems = [
-  { label: "Knowledge management", icon: BookOpen },
-  { label: "Settings", icon: Settings },
-  { label: "Account", icon: User },
-  { label: "Logout", icon: LogOut },
+  { label: "ナレッジ管理", icon: BookOpen },
+  { label: "設定", icon: Settings },
+  { label: "アカウント", icon: User },
+  { label: "ログアウト", icon: LogOut },
 ];
 
 type AppSidebarProps = {
@@ -31,52 +31,55 @@ type AppSidebarProps = {
 export function AppSidebar({ className }: AppSidebarProps) {
   return (
     <aside
-      aria-label="Chat navigation"
+      aria-label="チャットナビゲーション"
       className={cn(
-        "h-dvh w-72 shrink-0 flex-col border-r border-border bg-card/60 px-3 py-3",
+        "h-dvh w-72 shrink-0 flex-col border-r border-border/70 bg-card/70 px-3 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur",
         className,
       )}
     >
-      <div className="flex h-full min-h-0 flex-col">
+      <div className="flex h-full min-h-0 flex-col overflow-hidden">
         <div className="flex items-center px-2 py-2">
-          <span className="text-base font-semibold">4oSphere</span>
+          <span className="text-base font-semibold leading-none">4oSphere</span>
         </div>
-        <Button className="mt-2 justify-start" variant="outline">
+        <Button
+          className="mt-2 h-11 justify-start rounded-2xl shadow-sm shadow-primary/10"
+          variant="default"
+        >
           <Plus aria-hidden="true" className="size-4" />
-          New chat
+          <span className="leading-none">新しいチャット</span>
         </Button>
         <div className="mt-5 min-h-0 flex-1 overflow-y-auto">
           <div className="px-2 text-xs font-medium uppercase tracking-normal text-muted-foreground">
-            Chat list
+            チャット一覧
           </div>
-          <nav aria-label="Chat list" className="mt-2 space-y-1">
+          <nav aria-label="チャット一覧" className="mt-2 space-y-1">
             {chatItems.map((item) => (
               <Button
-                className="w-full justify-start overflow-hidden px-2 text-left"
+                className="h-10 w-full justify-start overflow-hidden rounded-2xl px-2 text-left"
                 key={item}
                 variant="ghost"
               >
                 <MessageSquare aria-hidden="true" className="size-4 shrink-0" />
-                <span className="truncate">{item}</span>
+                <span className="truncate leading-none">{item}</span>
               </Button>
             ))}
           </nav>
         </div>
         <nav
-          aria-label="App navigation"
-          className="mt-4 space-y-1 border-t pt-3"
+          aria-label="アプリナビゲーション"
+          className="mt-4 shrink-0 space-y-1 border-t border-border/70 pt-3"
         >
           {navItems.map((item) => {
             const Icon = item.icon;
 
             return (
               <Button
-                className="w-full justify-start px-2"
+                className="h-10 w-full justify-start rounded-2xl px-2"
                 key={item.label}
                 variant="ghost"
               >
                 <Icon aria-hidden="true" className="size-4" />
-                {item.label}
+                <span className="leading-none">{item.label}</span>
               </Button>
             );
           })}
