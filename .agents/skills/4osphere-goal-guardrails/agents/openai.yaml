@@ -1,0 +1,7 @@
+interface:
+  display_name: "4oSphere Goal Guardrails"
+  short_description: "Bounds long-running goal workflows with cost, safety, scope, and approval gates."
+  default_prompt: "Rewrite this long-running goal as a bounded 4oSphere work order."
+
+policy:
+  allow_implicit_invocation: false
