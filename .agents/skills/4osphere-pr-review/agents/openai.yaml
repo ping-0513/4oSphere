@@ -1,0 +1,7 @@
+interface:
+  display_name: "4oSphere PR Review"
+  short_description: "Integrated PR review for 4oSphere coverage, security, tests, docs, and merge readiness."
+  default_prompt: "Review this PR using the 4oSphere PR review criteria."
+
+policy:
+  allow_implicit_invocation: false
