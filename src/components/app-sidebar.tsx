@@ -7,28 +7,30 @@ import {
   User,
 } from "lucide-react";
 
+import { logoutAction } from "@/app/auth/actions";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import type { AuthenticatedProfile } from "@/types/auth";
 
 const chatItems = [
   "現在のシェル",
   "ナレッジメモ",
   "下書きチャット",
-  "モバイル表示確認",
+  "モデル表示確認",
 ];
 
 const navItems = [
   { label: "ナレッジ管理", icon: BookOpen },
   { label: "設定", icon: Settings },
   { label: "アカウント", icon: User },
-  { label: "ログアウト", icon: LogOut },
 ];
 
 type AppSidebarProps = {
   className?: string;
+  profile: AuthenticatedProfile;
 };
 
-export function AppSidebar({ className }: AppSidebarProps) {
+export function AppSidebar({ className, profile }: AppSidebarProps) {
   return (
     <aside
       aria-label="チャットナビゲーション"
@@ -83,6 +85,24 @@ export function AppSidebar({ className }: AppSidebarProps) {
               </Button>
             );
           })}
+          <div className="flex items-center gap-2 px-2 py-2">
+            <div className="grid size-8 place-items-center rounded-full border border-border/70 bg-accent/60">
+              <User aria-hidden="true" className="size-4" />
+            </div>
+            <span className="min-w-0 truncate text-sm text-muted-foreground">
+              {profile.displayName}
+            </span>
+          </div>
+          <form action={logoutAction}>
+            <Button
+              className="h-10 w-full justify-start rounded-2xl px-2"
+              type="submit"
+              variant="ghost"
+            >
+              <LogOut aria-hidden="true" className="size-4" />
+              <span className="leading-none">ログアウト</span>
+            </Button>
+          </form>
         </nav>
       </div>
     </aside>

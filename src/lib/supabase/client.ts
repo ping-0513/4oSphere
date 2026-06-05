@@ -1,14 +1,9 @@
-import { createClient } from "@supabase/supabase-js";
+import { createBrowserClient } from "@supabase/ssr";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+import { requireSupabasePublicConfig } from "@/lib/supabase/config";
 
 export function createSupabaseBrowserClient() {
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error(
-      "Supabase public environment variables are not configured.",
-    );
-  }
+  const { url, publishableKey } = requireSupabasePublicConfig();
 
-  return createClient(supabaseUrl, supabaseAnonKey);
+  return createBrowserClient(url, publishableKey);
 }

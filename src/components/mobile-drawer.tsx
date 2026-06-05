@@ -5,13 +5,19 @@ import { X } from "lucide-react";
 
 import { AppSidebar } from "@/components/app-sidebar";
 import { Button } from "@/components/ui/button";
+import type { AuthenticatedProfile } from "@/types/auth";
 
 type MobileDrawerProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  profile: AuthenticatedProfile;
 };
 
-export function MobileDrawer({ open, onOpenChange }: MobileDrawerProps) {
+export function MobileDrawer({
+  open,
+  onOpenChange,
+  profile,
+}: MobileDrawerProps) {
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
@@ -21,7 +27,7 @@ export function MobileDrawer({ open, onOpenChange }: MobileDrawerProps) {
           className="fixed inset-y-0 left-0 z-50 max-h-dvh w-[min(88vw,20rem)] overflow-hidden rounded-r-3xl border-r border-border/70 bg-card/85 shadow-xl shadow-black/25 outline-none backdrop-blur md:hidden"
         >
           <Dialog.Title className="sr-only">ナビゲーション</Dialog.Title>
-          <AppSidebar className="flex w-full border-r-0" />
+          <AppSidebar className="flex w-full border-r-0" profile={profile} />
           <Dialog.Close asChild>
             <Button
               aria-label="ナビゲーションを閉じる"
