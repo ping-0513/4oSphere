@@ -228,6 +228,17 @@ create index attachments_chat_idx on public.attachments(chat_id, user_id);
 create index message_web_search_refs_variant_idx
   on public.message_web_search_refs(assistant_response_variant_id);
 
+grant usage on schema public to authenticated;
+
+grant select, insert, update on table public.profiles to authenticated;
+grant select, insert, update on table public.chats to authenticated;
+grant select, insert, update on table public.message_turns to authenticated;
+grant select, insert, update on table public.user_messages to authenticated;
+grant select, insert, update on table public.assistant_response_variants to authenticated;
+grant select, insert, update on table public.turn_active_variants to authenticated;
+grant select, insert, update on table public.attachments to authenticated;
+grant select, insert, update on table public.message_web_search_refs to authenticated;
+
 alter table public.profiles enable row level security;
 alter table public.chats enable row level security;
 alter table public.message_turns enable row level security;
