@@ -30,6 +30,7 @@ export function ChatHeader({ currentChatTitle, onMenuClick }: ChatHeaderProps) {
         className="rounded-xl md:hidden"
         onClick={onMenuClick}
         size="icon"
+        title="ナビゲーションを開く"
         variant="ghost"
       >
         <Menu aria-hidden="true" className="size-5" />
@@ -40,10 +41,11 @@ export function ChatHeader({ currentChatTitle, onMenuClick }: ChatHeaderProps) {
           aria-haspopup="listbox"
           aria-label={`選択中のモデル ${selectedModel.label}`}
           className={cn(
-            "h-11 min-w-40 justify-between rounded-2xl border border-border/70 bg-card/75 px-4 text-base font-semibold leading-none shadow-sm shadow-black/10 backdrop-blur transition-colors hover:bg-accent/80",
+            "h-11 min-w-36 justify-between rounded-2xl border border-border/70 bg-card/75 px-4 text-base font-semibold leading-none shadow-sm shadow-black/10 backdrop-blur hover:bg-accent/80",
             modelMenuOpen && "border-ring/60 bg-accent/80 ring-2 ring-ring/20",
           )}
           onClick={() => setModelMenuOpen((open) => !open)}
+          title={`選択中: ${selectedModel.label}`}
           variant="outline"
         >
           <span>{selectedModel.label}</span>
@@ -57,7 +59,7 @@ export function ChatHeader({ currentChatTitle, onMenuClick }: ChatHeaderProps) {
         </Button>
         {modelMenuOpen ? (
           <div
-            aria-label="モデル候補"
+            aria-label="モデル選択"
             className="absolute left-0 top-12 z-30 w-72 rounded-3xl border border-border/70 bg-popover/90 p-2 shadow-xl shadow-black/20 backdrop-blur"
             role="listbox"
           >
@@ -65,7 +67,7 @@ export function ChatHeader({ currentChatTitle, onMenuClick }: ChatHeaderProps) {
               <button
                 aria-selected={selectedModel.label === model.label}
                 className={cn(
-                  "flex w-full items-center justify-between gap-3 rounded-2xl px-3 py-2.5 text-left text-sm text-popover-foreground outline-none transition-colors hover:bg-accent/80 focus-visible:ring-2 focus-visible:ring-ring/50",
+                  "flex w-full items-center justify-between gap-3 rounded-2xl px-3 py-2.5 text-left text-sm text-popover-foreground outline-none transition-[background-color,box-shadow,transform] hover:bg-accent/80 active:translate-y-px active:scale-[0.98] active:shadow-inner focus-visible:ring-2 focus-visible:ring-ring/50",
                   selectedModel.label === model.label && "bg-accent/80",
                 )}
                 key={model.modelId}
@@ -91,7 +93,7 @@ export function ChatHeader({ currentChatTitle, onMenuClick }: ChatHeaderProps) {
         ) : null}
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-medium text-foreground">
-            {currentChatTitle ?? "No chat selected"}
+            {currentChatTitle ?? "チャットが選択されていません"}
           </p>
         </div>
       </div>

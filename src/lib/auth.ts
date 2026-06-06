@@ -15,10 +15,6 @@ type UnauthenticatedAppContext = {
   status: "unauthenticated" | "unconfigured";
 };
 
-function getFallbackDisplayName(userId: string) {
-  return `User ${userId.slice(0, 8)}`;
-}
-
 export async function getVerifiedUserId(supabase: SupabaseClient) {
   const { data: claimsData, error } = await supabase.auth.getClaims();
 
@@ -55,7 +51,7 @@ export async function getAuthenticatedAppContext(): Promise<
     userId,
     profile: {
       id: userId,
-      displayName: profile?.display_name ?? getFallbackDisplayName(userId),
+      displayName: profile?.display_name?.trim() || "アカウント",
       avatarUrl: profile?.avatar_url ?? null,
     },
   };

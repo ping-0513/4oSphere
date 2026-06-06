@@ -43,6 +43,7 @@ export function MobileDrawer({
               aria-label="ナビゲーションを閉じる"
               className="absolute right-3 top-3 rounded-2xl"
               size="icon"
+              title="ナビゲーションを閉じる"
               variant="ghost"
             >
               <X aria-hidden="true" className="size-4" />

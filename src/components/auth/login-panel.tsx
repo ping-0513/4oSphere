@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { LogIn } from "lucide-react";
+import { LoaderCircle, LogIn } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -44,7 +44,7 @@ export function LoginPanel({ authError, supabaseConfigured }: LoginPanelProps) {
         <div className="mb-8">
           <p className="text-sm font-medium text-primary">4oSphere</p>
           <h1 className="mt-3 text-3xl font-semibold leading-tight">
-            GPT-4o chat
+            GPT-4o チャット
           </h1>
         </div>
         <Button
@@ -53,8 +53,12 @@ export function LoginPanel({ authError, supabaseConfigured }: LoginPanelProps) {
           onClick={signInWithGoogle}
           variant="default"
         >
-          <LogIn aria-hidden="true" className="size-5" />
-          <span>{pending ? "接続中" : "Google でログイン"}</span>
+          {pending ? (
+            <LoaderCircle aria-hidden="true" className="size-5 animate-spin" />
+          ) : (
+            <LogIn aria-hidden="true" className="size-5" />
+          )}
+          <span>{pending ? "接続中..." : "Google でログイン"}</span>
         </Button>
         {!supabaseConfigured ? (
           <p className="mt-4 text-sm leading-6 text-muted-foreground">

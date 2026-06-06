@@ -7,6 +7,7 @@ import { ChatComposer } from "@/components/chat-composer";
 import { ChatHeader } from "@/components/chat-header";
 import { MessageList } from "@/components/message-list";
 import { MobileDrawer } from "@/components/mobile-drawer";
+import { getChatDisplayTitle } from "@/lib/chat-display";
 import type { AuthenticatedProfile } from "@/types/auth";
 import type { ChatListItem, CurrentChat } from "@/types/chat";
 
@@ -36,11 +37,13 @@ export function AppShell({ chats, currentChat, profile }: AppShellProps) {
       />
       <section className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <ChatHeader
-          currentChatTitle={currentChat?.title ?? null}
+          currentChatTitle={
+            currentChat ? getChatDisplayTitle(currentChat.title) : null
+          }
           onMenuClick={() => setDrawerOpen(true)}
         />
         <MessageList currentChat={currentChat} />
-        <ChatComposer />
+        {currentChat ? <ChatComposer /> : null}
       </section>
     </main>
   );
