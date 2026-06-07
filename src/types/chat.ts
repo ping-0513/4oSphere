@@ -66,6 +66,20 @@ export type UserMessageRow = {
   deleted_at: string | null;
 };
 
+export type PersistedUserMessage = {
+  id: string;
+  turnId: string;
+  turnIndex: number;
+  contentRaw: string;
+  createdAt: string;
+};
+
+export type UserMessageInsertResult = {
+  turn_id: string;
+  user_message_id: string;
+  turn_index: number;
+};
+
 export type AssistantResponseStatus =
   | "placeholder"
   | "pending"

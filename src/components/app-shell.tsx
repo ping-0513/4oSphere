@@ -9,15 +9,25 @@ import { MessageList } from "@/components/message-list";
 import { MobileDrawer } from "@/components/mobile-drawer";
 import { getChatDisplayTitle } from "@/lib/chat-display";
 import type { AuthenticatedProfile } from "@/types/auth";
-import type { ChatListItem, CurrentChat } from "@/types/chat";
+import type {
+  ChatListItem,
+  CurrentChat,
+  PersistedUserMessage,
+} from "@/types/chat";
 
 type AppShellProps = {
   chats: ChatListItem[];
   currentChat: CurrentChat | null;
+  messages: PersistedUserMessage[];
   profile: AuthenticatedProfile;
 };
 
-export function AppShell({ chats, currentChat, profile }: AppShellProps) {
+export function AppShell({
+  chats,
+  currentChat,
+  messages,
+  profile,
+}: AppShellProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
@@ -42,8 +52,8 @@ export function AppShell({ chats, currentChat, profile }: AppShellProps) {
           }
           onMenuClick={() => setDrawerOpen(true)}
         />
-        <MessageList currentChat={currentChat} />
-        {currentChat ? <ChatComposer /> : null}
+        <MessageList currentChat={currentChat} messages={messages} />
+        {currentChat ? <ChatComposer chatId={currentChat.id} /> : null}
       </section>
     </main>
   );

@@ -26,5 +26,12 @@ export default async function Home({ searchParams }: HomeProps) {
 
   const chats = await listVisibleChats(auth.supabase);
 
-  return <AppShell chats={chats} currentChat={null} profile={auth.profile} />;
+  return (
+    <AppShell
+      chats={chats}
+      currentChat={null}
+      messages={[]}
+      profile={auth.profile}
+    />
+  );
 }

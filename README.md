@@ -7,7 +7,8 @@
 
 This repository currently contains the Next.js, TypeScript, Tailwind CSS,
 component, linting, formatting, environment, Supabase Auth wiring, chat routing,
-chat creation, chat list loading, and the Phase 1 app shell.
+chat creation, chat list loading, user-message persistence, and the Phase 1 app
+shell.
 
 ## Local setup
 
@@ -56,8 +57,12 @@ does not automatically open an existing chat.
 
 Chat lists and direct chat loads only read rows where `deleted_at is null`.
 Deleted chats are hidden from the list and direct deleted-chat URLs return the
-same not-found behavior as missing or inaccessible chats. Message persistence
-is deferred to a later phase.
+same not-found behavior as missing or inaccessible chats.
+
+User messages are saved through the authenticated-only
+`create_user_message_turn` RPC. The RPC uses `auth.uid()`, respects RLS, creates
+the message turn and user message atomically, and updates the chat ordering
+timestamp. Assistant responses, OpenAI calls, and streaming are deferred.
 
 ## Verification
 
