@@ -1,9 +1,11 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { validateChatTitle } from "@/lib/chat-validation";
 import type { ChatListItem, CurrentChat } from "@/types/chat";
 
 const CHAT_SELECT_COLUMNS =
   "id,title,created_at,updated_at,archived_at,deleted_at";
+export const INITIAL_CHAT_TITLE = "New chat";
 
 type SupabaseQueryError = {
   code?: string | null;
@@ -117,6 +119,60 @@ export async function renameVisibleChat(
   if (error || !data) {
     throw new ChatManagementError();
   }
+}
+
+export async function isVisibleChatUsingInitialTitle(
+  supabase: SupabaseClient,
+  chatId: string,
+  userId: string,
+) {
+  if (!isUuid(chatId)) {
+    return false;
+  }
+
+  const { data, error } = await supabase
+    .from("chats")
+    .select("id")
+    .eq("id", chatId)
+    .eq("user_id", userId)
+    .is("deleted_at", null)
+    .eq("title", INITIAL_CHAT_TITLE)
+    .maybeSingle();
+
+  if (error) {
+    throw createChatQueryError("Failed to check chat title", error);
+  }
+
+  return Boolean(data);
+}
+
+export async function updateInitialChatTitle(
+  supabase: SupabaseClient,
+  chatId: string,
+  userId: string,
+  title: string,
+) {
+  if (!isUuid(chatId) || validateChatTitle(title)) {
+    throw new ChatManagementError();
+  }
+
+  // The title condition prevents an in-flight generation from overwriting a rename.
+  // The Phase 2A chats_set_updated_at trigger updates updated_at.
+  const { data, error } = await supabase
+    .from("chats")
+    .update({ title })
+    .eq("id", chatId)
+    .eq("user_id", userId)
+    .is("deleted_at", null)
+    .eq("title", INITIAL_CHAT_TITLE)
+    .select("id")
+    .maybeSingle();
+
+  if (error) {
+    throw new ChatManagementError();
+  }
+
+  return Boolean(data);
 }
 
 export async function softDeleteVisibleChat(

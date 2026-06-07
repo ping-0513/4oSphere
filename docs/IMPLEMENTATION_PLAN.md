@@ -117,12 +117,12 @@ non-streaming mode, disables OpenAI response storage, uses no tools, and stores
 one completed assistant variant plus its active-variant pointer for each new
 user turn.
 
-After OpenAI API integration, add automatic chat-title generation:
+The Phase 3B integration adds automatic chat-title generation:
 
-- Run after the first user message is sent only when the chat title is still
-  the initial default.
+- Run after the first user message and assistant response are saved only when
+  the raw database chat title is still `New chat`.
 - Use `4o-1120` / `gpt-4o-2024-11-20`.
-- Save the generated title to `chats.title`.
+- Save a validated, single-line generated title to `chats.title`.
 - Never overwrite a title that the user manually renamed.
 - Limit generated titles to 40 characters.
 - Do not couple title generation failure to user-message persistence.

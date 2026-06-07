@@ -88,7 +88,15 @@ the three supported formal model IDs, and the completed assistant response plus
 its active-variant pointer are saved atomically through the authenticated-only
 `save_initial_assistant_response` RPC. OpenAI response storage is disabled with
 `store: false`; the Supabase database remains the conversation source of truth.
-Regenerate, user edit, streaming, tools, and automatic title generation remain
+
+After the first user message and assistant response are saved, the server makes
+a best-effort title-generation request with the fixed
+`gpt-4o-2024-11-20` snapshot. It only updates a visible chat whose raw database
+title is still `New chat`, so a manual rename is not overwritten. Generated
+titles are rejected unless they are a single safe line of at most 40
+characters. A title-generation failure does not fail the saved conversation.
+
+Regenerate, user edit, streaming, tools, and title-regeneration UI remain
 deferred.
 
 ## Verification

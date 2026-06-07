@@ -1,8 +1,13 @@
 "use server";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 
 import { getVerifiedUserId } from "@/lib/auth";
+import {
+  isVisibleChatUsingInitialTitle,
+  updateInitialChatTitle,
+} from "@/lib/chats";
 import type { SendUserMessageState } from "@/lib/message-action-state";
 import { validateUserMessageContent } from "@/lib/message-validation";
 import {
@@ -13,11 +18,34 @@ import {
 } from "@/lib/messages";
 import { hasOpenAiApiKey } from "@/lib/openai/client";
 import { generateAssistantResponse } from "@/lib/openai/generate-assistant-response";
+import { generateChatTitle } from "@/lib/openai/generate-chat-title";
 import { getGpt4oApiModelId, isGpt4oSnapshotLabel } from "@/lib/openai/models";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 const GENERATION_FAILED_MESSAGE =
   "メッセージは保存されましたが、応答生成に失敗しました。";
+
+async function tryGenerateInitialChatTitle(
+  supabase: SupabaseClient,
+  chatId: string,
+  userId: string,
+  firstUserMessage: string,
+  turnIndex: number,
+) {
+  try {
+    if (
+      turnIndex !== 0 ||
+      !(await isVisibleChatUsingInitialTitle(supabase, chatId, userId))
+    ) {
+      return;
+    }
+
+    const title = await generateChatTitle(firstUserMessage);
+    await updateInitialChatTitle(supabase, chatId, userId, title);
+  } catch {
+    // Title generation is best-effort and must not fail a saved conversation.
+  }
+}
 
 export async function sendUserMessageAction(
   _previousState: SendUserMessageState,
@@ -84,6 +112,13 @@ export async function sendUserMessageAction(
       );
 
       await saveInitialAssistantResponse(supabase, result.turn_id, generation);
+      await tryGenerateInitialChatTitle(
+        supabase,
+        chatId,
+        userId,
+        contentRaw,
+        result.turn_index,
+      );
 
       revalidatePath("/");
       revalidatePath(`/chat/${chatId}`);
