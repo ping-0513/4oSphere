@@ -12,6 +12,12 @@ type SupabaseQueryError = {
   message?: string | null;
 };
 
+export class ChatManagementError extends Error {
+  constructor() {
+    super("このチャットを更新できませんでした。");
+  }
+}
+
 function redactSensitiveErrorText(value: string | null | undefined) {
   return (value ?? "")
     .replace(/Bearer\s+\S+/gi, "Bearer [REDACTED]")
@@ -86,4 +92,53 @@ export async function getVisibleChatById(
   }
 
   return data as CurrentChat | null;
+}
+
+export async function renameVisibleChat(
+  supabase: SupabaseClient,
+  chatId: string,
+  userId: string,
+  title: string,
+) {
+  if (!isUuid(chatId)) {
+    throw new ChatManagementError();
+  }
+
+  // The Phase 2A chats_set_updated_at trigger updates updated_at.
+  const { data, error } = await supabase
+    .from("chats")
+    .update({ title })
+    .eq("id", chatId)
+    .eq("user_id", userId)
+    .is("deleted_at", null)
+    .select("id")
+    .maybeSingle();
+
+  if (error || !data) {
+    throw new ChatManagementError();
+  }
+}
+
+export async function softDeleteVisibleChat(
+  supabase: SupabaseClient,
+  chatId: string,
+  userId: string,
+) {
+  if (!isUuid(chatId)) {
+    throw new ChatManagementError();
+  }
+
+  // The Phase 2A chats_set_updated_at trigger updates updated_at.
+  const { data, error } = await supabase
+    .from("chats")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", chatId)
+    .eq("user_id", userId)
+    .is("deleted_at", null)
+    .select("id")
+    .maybeSingle();
+
+  if (error || !data) {
+    throw new ChatManagementError();
+  }
 }

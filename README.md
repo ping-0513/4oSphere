@@ -7,8 +7,8 @@
 
 This repository currently contains the Next.js, TypeScript, Tailwind CSS,
 component, linting, formatting, environment, Supabase Auth wiring, chat routing,
-chat creation, chat list loading, user-message persistence, and the Phase 1 app
-shell.
+chat creation, chat list loading, chat rename and soft delete, user-message
+persistence, and the Phase 1 app shell.
 
 ## Local setup
 
@@ -58,6 +58,14 @@ does not automatically open an existing chat.
 Chat lists and direct chat loads only read rows where `deleted_at is null`.
 Deleted chats are hidden from the list and direct deleted-chat URLs return the
 same not-found behavior as missing or inaccessible chats.
+
+Authenticated users can rename their own visible chats and soft-delete them
+from the desktop sidebar or mobile drawer. Chat deletion only sets
+`chats.deleted_at`; the app does not grant or use hard-delete operations.
+
+The Phase 2E migration adds database checks that reject whitespace-only chat
+titles and titles longer than 80 characters. It intentionally does not rewrite
+existing data, so applying it can fail if existing rows violate those rules.
 
 User messages are saved through the authenticated-only
 `create_user_message_turn` RPC. The RPC uses `auth.uid()`, respects RLS, creates

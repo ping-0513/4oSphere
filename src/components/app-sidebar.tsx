@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { BookOpen, MessageSquare, Settings } from "lucide-react";
+import { BookOpen, Settings } from "lucide-react";
 
 import { createChatAction } from "@/app/chat/actions";
 import { AccountMenu } from "@/components/account-menu";
+import { ChatListRow } from "@/components/chat-list-row";
 import { NewChatForm } from "@/components/new-chat-submit-button";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { getChatDisplayTitle } from "@/lib/chat-display";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { AuthenticatedProfile } from "@/types/auth";
 import type { ChatListItem } from "@/types/chat";
@@ -49,31 +49,13 @@ export function AppSidebar({
           </div>
           <nav aria-label="チャット一覧" className="mt-2 space-y-1">
             {chats.length ? (
-              chats.map((chat) => {
-                const selected = chat.id === currentChatId;
-
-                return (
-                  <Link
-                    aria-current={selected ? "page" : undefined}
-                    className={cn(
-                      buttonVariants({ variant: "ghost" }),
-                      "h-10 w-full justify-start overflow-hidden rounded-2xl px-2 text-left",
-                      selected &&
-                        "bg-accent text-accent-foreground shadow-inner",
-                    )}
-                    href={`/chat/${chat.id}`}
-                    key={chat.id}
-                  >
-                    <MessageSquare
-                      aria-hidden="true"
-                      className="size-4 shrink-0"
-                    />
-                    <span className="truncate leading-none">
-                      {getChatDisplayTitle(chat.title)}
-                    </span>
-                  </Link>
-                );
-              })
+              chats.map((chat) => (
+                <ChatListRow
+                  chat={chat}
+                  key={chat.id}
+                  selected={chat.id === currentChatId}
+                />
+              ))
             ) : (
               <p className="px-2 py-2 text-sm leading-6 text-muted-foreground">
                 まだチャットはありません
