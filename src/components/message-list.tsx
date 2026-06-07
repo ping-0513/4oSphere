@@ -1,12 +1,18 @@
 import { createChatAction } from "@/app/chat/actions";
+import { AssistantMessageActions } from "@/components/assistant-message-actions";
 import { MarkdownMessage } from "@/components/markdown-message";
 import { NewChatForm } from "@/components/new-chat-submit-button";
 import { cn } from "@/lib/utils";
-import type { CurrentChat, PersistedChatMessage } from "@/types/chat";
+import type {
+  CurrentChat,
+  Gpt4oSnapshotLabel,
+  PersistedChatMessage,
+} from "@/types/chat";
 
 type MessageListProps = {
   currentChat: CurrentChat | null;
   messages: PersistedChatMessage[];
+  selectedSnapshot: Gpt4oSnapshotLabel;
 };
 
 const timestampFormatter = new Intl.DateTimeFormat("ja-JP", {
@@ -15,7 +21,11 @@ const timestampFormatter = new Intl.DateTimeFormat("ja-JP", {
   timeZone: "Asia/Tokyo",
 });
 
-export function MessageList({ currentChat, messages }: MessageListProps) {
+export function MessageList({
+  currentChat,
+  messages,
+  selectedSnapshot,
+}: MessageListProps) {
   if (!currentChat) {
     return (
       <MessageEmptyState
@@ -86,6 +96,14 @@ export function MessageList({ currentChat, messages }: MessageListProps) {
                 </>
               ) : null}
             </div>
+            {message.role === "assistant" && message.isLatestTurn ? (
+              <AssistantMessageActions
+                activeVariantId={message.id}
+                selectedSnapshot={selectedSnapshot}
+                turnId={message.turnId}
+                variants={message.variants}
+              />
+            ) : null}
           </article>
         ))}
       </div>

@@ -58,7 +58,11 @@ export function AppShell({
           onSelectedSnapshotChange={setSelectedSnapshot}
           selectedSnapshot={selectedSnapshot}
         />
-        <MessageList currentChat={currentChat} messages={messages} />
+        <MessageList
+          currentChat={currentChat}
+          messages={messages}
+          selectedSnapshot={selectedSnapshot}
+        />
         {currentChat ? (
           <ChatComposer
             chatId={currentChat.id}

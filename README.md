@@ -96,8 +96,15 @@ title is still `New chat`, so a manual rename is not overwritten. Generated
 titles are rejected unless they are a single safe line of at most 40
 characters. A title-generation failure does not fail the saved conversation.
 
-Regenerate, user edit, streaming, tools, and title-regeneration UI remain
-deferred.
+User edit, streaming, tools, and title-regeneration UI remain deferred.
+
+Phase 3C adds non-streaming assistant-response regeneration and active-variant
+switching. Regeneration appends a completed `assistant_response_variants` row
+to the same turn and atomically selects it; it does not create another user
+message or message turn. Until branch/edit/resend support exists, regenerate
+and variant switching are intentionally limited to the latest visible turn.
+Older turns and user-only turns without a completed active assistant response
+cannot be operated on.
 
 ## Verification
 

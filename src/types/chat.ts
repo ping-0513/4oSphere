@@ -71,6 +71,16 @@ export type AssistantResponseInsertResult = {
   assistant_response_variant_id: string;
 };
 
+export type RegeneratedAssistantResponseInsertResult =
+  AssistantResponseInsertResult & {
+    variant_index: number;
+  };
+
+export type AssistantVariantSummary = {
+  id: string;
+  variantIndex: number;
+};
+
 export type AssistantResponseStatus =
   | "placeholder"
   | "pending"
@@ -185,6 +195,9 @@ export type PersistedChatMessage =
       outputTokens: number | null;
       estimatedCost: number | null;
       latencyMs: number | null;
+      isLatestTurn: boolean;
+      variantIndex: number;
+      variants: AssistantVariantSummary[];
     };
 
 // Raw Markdown is stored in content_raw and sanitized only at render time.

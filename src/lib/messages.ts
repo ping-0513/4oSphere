@@ -140,7 +140,7 @@ export async function listVisibleChatMessages(
     supabase
       .from("assistant_response_variants")
       .select(
-        "id,turn_id,content_raw,api_model_id,input_tokens,output_tokens,estimated_cost,latency_ms,created_at",
+        "id,turn_id,variant_index,content_raw,api_model_id,input_tokens,output_tokens,estimated_cost,latency_ms,created_at",
       )
       .eq("chat_id", chatId)
       .eq("status", "completed")
@@ -181,6 +181,7 @@ export async function listVisibleChatMessages(
         AssistantResponseVariantRow,
         | "id"
         | "turn_id"
+        | "variant_index"
         | "content_raw"
         | "api_model_id"
         | "input_tokens"
@@ -190,6 +191,26 @@ export async function listVisibleChatMessages(
         | "created_at"
       >[]
     ).map((variant) => [variant.id, variant]),
+  );
+  const assistantVariantsByTurnId = new Map<
+    string,
+    { id: string; variantIndex: number }[]
+  >();
+
+  for (const variant of assistantVariantsById.values()) {
+    const variants = assistantVariantsByTurnId.get(variant.turn_id) ?? [];
+
+    variants.push({ id: variant.id, variantIndex: variant.variant_index });
+    assistantVariantsByTurnId.set(variant.turn_id, variants);
+  }
+
+  for (const variants of assistantVariantsByTurnId.values()) {
+    variants.sort((a, b) => a.variantIndex - b.variantIndex);
+  }
+
+  const latestTurnIndex = Math.max(
+    -1,
+    ...(turns ?? []).map((turn) => turn.turn_index),
   );
 
   return (turns ?? []).flatMap((turn) => {
@@ -228,6 +249,9 @@ export async function listVisibleChatMessages(
         outputTokens: activeVariant.output_tokens,
         estimatedCost: activeVariant.estimated_cost,
         latencyMs: activeVariant.latency_ms,
+        isLatestTurn: turn.turn_index === latestTurnIndex,
+        variantIndex: activeVariant.variant_index,
+        variants: assistantVariantsByTurnId.get(turn.id) ?? [],
       });
     }
 

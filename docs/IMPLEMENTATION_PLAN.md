@@ -127,6 +127,16 @@ The Phase 3B integration adds automatic chat-title generation:
 - Limit generated titles to 40 characters.
 - Do not couple title generation failure to user-message persistence.
 
+The Phase 3C integration adds non-streaming assistant-response variants:
+
+- Regenerate appends a completed assistant variant to the same message turn.
+- The new variant becomes active atomically; no user message or turn is added.
+- Existing completed variants can be selected without calling OpenAI.
+- Until branch/edit/resend support exists, regenerate and variant switching are
+  limited to the latest visible turn.
+- User-only turns without a completed active assistant response are not
+  retryable in this phase.
+
 ## Phase 5: message actions and metadata
 
 Add required message actions:
