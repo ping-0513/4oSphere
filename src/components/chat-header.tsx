@@ -4,24 +4,27 @@ import { useState } from "react";
 import { Check, ChevronDown, Menu } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { GPT_4O_MODEL_OPTIONS } from "@/lib/openai/models";
 import { cn } from "@/lib/utils";
+import type { Gpt4oSnapshotLabel } from "@/types/chat";
 
 type ChatHeaderProps = {
   onMenuClick: () => void;
   currentChatTitle: string | null;
+  onSelectedSnapshotChange: (snapshot: Gpt4oSnapshotLabel) => void;
+  selectedSnapshot: Gpt4oSnapshotLabel;
 };
 
-const modelOptions = [
-  { label: "4o-0513", modelId: "gpt-4o-2024-05-13" },
-  { label: "4o-0806", modelId: "gpt-4o-2024-08-06" },
-  { label: "4o-1120", modelId: "gpt-4o-2024-11-20" },
-] as const;
-
-export function ChatHeader({ currentChatTitle, onMenuClick }: ChatHeaderProps) {
+export function ChatHeader({
+  currentChatTitle,
+  onMenuClick,
+  onSelectedSnapshotChange,
+  selectedSnapshot,
+}: ChatHeaderProps) {
   const [modelMenuOpen, setModelMenuOpen] = useState(false);
-  const [selectedModel, setSelectedModel] = useState<
-    (typeof modelOptions)[number]
-  >(modelOptions[2]);
+  const selectedModel =
+    GPT_4O_MODEL_OPTIONS.find((model) => model.label === selectedSnapshot) ??
+    GPT_4O_MODEL_OPTIONS[2];
 
   return (
     <header className="flex h-16 shrink-0 items-center gap-2 border-b border-border/70 bg-background/90 px-3 backdrop-blur md:px-4">
@@ -63,16 +66,16 @@ export function ChatHeader({ currentChatTitle, onMenuClick }: ChatHeaderProps) {
             className="absolute left-0 top-12 z-30 w-72 rounded-3xl border border-border/70 bg-popover/90 p-2 shadow-xl shadow-black/20 backdrop-blur"
             role="listbox"
           >
-            {modelOptions.map((model) => (
+            {GPT_4O_MODEL_OPTIONS.map((model) => (
               <button
                 aria-selected={selectedModel.label === model.label}
                 className={cn(
                   "flex w-full items-center justify-between gap-3 rounded-2xl px-3 py-2.5 text-left text-sm text-popover-foreground outline-none transition-[background-color,box-shadow,transform] hover:bg-accent/80 active:translate-y-px active:scale-[0.98] active:shadow-inner focus-visible:ring-2 focus-visible:ring-ring/50",
                   selectedModel.label === model.label && "bg-accent/80",
                 )}
-                key={model.modelId}
+                key={model.apiModelId}
                 onClick={() => {
-                  setSelectedModel(model);
+                  onSelectedSnapshotChange(model.label);
                   setModelMenuOpen(false);
                 }}
                 role="option"
@@ -81,7 +84,7 @@ export function ChatHeader({ currentChatTitle, onMenuClick }: ChatHeaderProps) {
                 <span className="min-w-0 leading-tight">
                   <span className="block font-medium">{model.label}</span>
                   <span className="block truncate text-xs text-muted-foreground">
-                    {model.modelId}
+                    {model.apiModelId}
                   </span>
                 </span>
                 {selectedModel.label === model.label ? (

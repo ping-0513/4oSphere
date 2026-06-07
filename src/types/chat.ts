@@ -1,22 +1,9 @@
-export const GPT_4O_MODEL_OPTIONS = [
-  {
-    label: "4o-0513",
-    apiModelId: "gpt-4o-2024-05-13",
-  },
-  {
-    label: "4o-0806",
-    apiModelId: "gpt-4o-2024-08-06",
-  },
-  {
-    label: "4o-1120",
-    apiModelId: "gpt-4o-2024-11-20",
-  },
-] as const;
-
-export type Gpt4oSnapshotLabel = (typeof GPT_4O_MODEL_OPTIONS)[number]["label"];
+export type Gpt4oSnapshotLabel = "4o-0513" | "4o-0806" | "4o-1120";
 
 export type Gpt4oApiModelId =
-  (typeof GPT_4O_MODEL_OPTIONS)[number]["apiModelId"];
+  | "gpt-4o-2024-05-13"
+  | "gpt-4o-2024-08-06"
+  | "gpt-4o-2024-11-20";
 
 export type JsonValue =
   | string
@@ -78,6 +65,10 @@ export type UserMessageInsertResult = {
   turn_id: string;
   user_message_id: string;
   turn_index: number;
+};
+
+export type AssistantResponseInsertResult = {
+  assistant_response_variant_id: string;
 };
 
 export type AssistantResponseStatus =
@@ -157,6 +148,44 @@ export type ChatTurnWithActiveVariant = {
   activeAssistantVariant: AssistantResponseVariantRow | null;
   assistantVariants: AssistantResponseVariantRow[];
 };
+
+export type ConversationMessage = {
+  role: "assistant" | "user";
+  contentRaw: string;
+};
+
+export type AssistantGenerationResult = {
+  apiModelId: Gpt4oApiModelId;
+  contentRaw: string;
+  inputTokens: number | null;
+  latencyMs: number;
+  outputTokens: number | null;
+  selectedSnapshot: Gpt4oSnapshotLabel;
+  settingsSnapshot: JsonValue;
+};
+
+export type PersistedChatMessage =
+  | {
+      id: string;
+      role: "user";
+      turnId: string;
+      turnIndex: number;
+      contentRaw: string;
+      createdAt: string;
+    }
+  | {
+      id: string;
+      role: "assistant";
+      turnId: string;
+      turnIndex: number;
+      contentRaw: string;
+      createdAt: string;
+      apiModelId: Gpt4oApiModelId;
+      inputTokens: number | null;
+      outputTokens: number | null;
+      estimatedCost: number | null;
+      latencyMs: number | null;
+    };
 
 // Raw Markdown is stored in content_raw and sanitized only at render time.
 // Regenerate appends an AssistantResponseVariantRow for the same turn_id.

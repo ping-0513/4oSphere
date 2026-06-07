@@ -1,7 +1,12 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type {
-  PersistedUserMessage,
+  AssistantGenerationResult,
+  AssistantResponseInsertResult,
+  AssistantResponseVariantRow,
+  ConversationMessage,
+  PersistedChatMessage,
+  TurnActiveVariantRow,
   UserMessageInsertResult,
   UserMessageRow,
 } from "@/types/chat";
@@ -76,13 +81,46 @@ export async function createUserMessageTurn(
   return result;
 }
 
-export async function listVisibleUserMessages(
+export async function saveInitialAssistantResponse(
+  supabase: SupabaseClient,
+  turnId: string,
+  result: AssistantGenerationResult,
+) {
+  const { data, error } = await supabase.rpc(
+    "save_initial_assistant_response",
+    {
+      p_api_model_id: result.apiModelId,
+      p_content_raw: result.contentRaw,
+      p_input_tokens: result.inputTokens,
+      p_latency_ms: result.latencyMs,
+      p_output_tokens: result.outputTokens,
+      p_selected_model_snapshot: result.selectedSnapshot,
+      p_settings_snapshot: result.settingsSnapshot,
+      p_turn_id: turnId,
+    },
+  );
+
+  if (error || typeof data !== "string") {
+    throw new MessagePersistenceError(
+      "unknown",
+      "メッセージは保存されましたが、応答生成に失敗しました。",
+    );
+  }
+
+  return {
+    assistant_response_variant_id: data,
+  } satisfies AssistantResponseInsertResult;
+}
+
+export async function listVisibleChatMessages(
   supabase: SupabaseClient,
   chatId: string,
 ) {
   const [
     { data: turns, error: turnsError },
     { data: messages, error: messagesError },
+    { data: activeVariants, error: activeVariantsError },
+    { data: assistantVariants, error: assistantVariantsError },
   ] = await Promise.all([
     supabase
       .from("message_turns")
@@ -95,9 +133,26 @@ export async function listVisibleUserMessages(
       .select("id,turn_id,content_raw,created_at")
       .eq("chat_id", chatId)
       .is("deleted_at", null),
+    supabase
+      .from("turn_active_variants")
+      .select("turn_id,assistant_response_variant_id")
+      .eq("chat_id", chatId),
+    supabase
+      .from("assistant_response_variants")
+      .select(
+        "id,turn_id,content_raw,api_model_id,input_tokens,output_tokens,estimated_cost,latency_ms,created_at",
+      )
+      .eq("chat_id", chatId)
+      .eq("status", "completed")
+      .is("deleted_at", null),
   ]);
 
-  if (turnsError || messagesError) {
+  if (
+    turnsError ||
+    messagesError ||
+    activeVariantsError ||
+    assistantVariantsError
+  ) {
     throw new Error("Failed to load messages.");
   }
 
@@ -109,6 +164,33 @@ export async function listVisibleUserMessages(
       >[]
     ).map((message) => [message.turn_id, message]),
   );
+  const activeVariantIdsByTurnId = new Map(
+    (
+      (activeVariants ?? []) as Pick<
+        TurnActiveVariantRow,
+        "turn_id" | "assistant_response_variant_id"
+      >[]
+    ).map((activeVariant) => [
+      activeVariant.turn_id,
+      activeVariant.assistant_response_variant_id,
+    ]),
+  );
+  const assistantVariantsById = new Map(
+    (
+      (assistantVariants ?? []) as Pick<
+        AssistantResponseVariantRow,
+        | "id"
+        | "turn_id"
+        | "content_raw"
+        | "api_model_id"
+        | "input_tokens"
+        | "output_tokens"
+        | "estimated_cost"
+        | "latency_ms"
+        | "created_at"
+      >[]
+    ).map((variant) => [variant.id, variant]),
+  );
 
   return (turns ?? []).flatMap((turn) => {
     const message = messagesByTurnId.get(turn.id);
@@ -117,14 +199,53 @@ export async function listVisibleUserMessages(
       return [];
     }
 
-    return [
+    const result: PersistedChatMessage[] = [
       {
         id: message.id,
+        role: "user",
         turnId: turn.id,
         turnIndex: turn.turn_index,
         contentRaw: message.content_raw,
         createdAt: message.created_at,
-      } satisfies PersistedUserMessage,
+      },
     ];
+
+    const activeVariantId = activeVariantIdsByTurnId.get(turn.id);
+    const activeVariant = activeVariantId
+      ? assistantVariantsById.get(activeVariantId)
+      : null;
+
+    if (activeVariant?.api_model_id) {
+      result.push({
+        id: activeVariant.id,
+        role: "assistant",
+        turnId: turn.id,
+        turnIndex: turn.turn_index,
+        contentRaw: activeVariant.content_raw,
+        createdAt: activeVariant.created_at,
+        apiModelId: activeVariant.api_model_id,
+        inputTokens: activeVariant.input_tokens,
+        outputTokens: activeVariant.output_tokens,
+        estimatedCost: activeVariant.estimated_cost,
+        latencyMs: activeVariant.latency_ms,
+      });
+    }
+
+    return result;
   });
+}
+
+export async function listConversationMessages(
+  supabase: SupabaseClient,
+  chatId: string,
+) {
+  const messages = await listVisibleChatMessages(supabase, chatId);
+
+  return messages.map(
+    (message) =>
+      ({
+        role: message.role,
+        contentRaw: message.contentRaw,
+      }) satisfies ConversationMessage,
+  );
 }

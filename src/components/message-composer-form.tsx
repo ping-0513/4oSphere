@@ -18,12 +18,17 @@ import {
   MAX_USER_MESSAGE_CHARACTERS,
   validateUserMessageContent,
 } from "@/lib/message-validation";
+import type { Gpt4oSnapshotLabel } from "@/types/chat";
 
 type MessageComposerFormProps = {
   chatId: string;
+  selectedSnapshot: Gpt4oSnapshotLabel;
 };
 
-export function MessageComposerForm({ chatId }: MessageComposerFormProps) {
+export function MessageComposerForm({
+  chatId,
+  selectedSnapshot,
+}: MessageComposerFormProps) {
   const router = useRouter();
   const [content, setContent] = useState("");
   const [clientError, setClientError] = useState<string | null>(null);
@@ -44,7 +49,7 @@ export function MessageComposerForm({ chatId }: MessageComposerFormProps) {
         if (result.successId) {
           setContent("");
           setClientError(null);
-          setShowServerError(false);
+          setShowServerError(Boolean(result.error));
           router.refresh();
         } else {
           setShowServerError(Boolean(result.error));
@@ -58,6 +63,7 @@ export function MessageComposerForm({ chatId }: MessageComposerFormProps) {
 
         return {
           error: "メッセージを保存できませんでした。",
+          generationFailed: false,
           successId: null,
         };
       }
@@ -102,6 +108,7 @@ export function MessageComposerForm({ chatId }: MessageComposerFormProps) {
   return (
     <form action={formAction} onSubmit={handleSubmit}>
       <input name="chatId" type="hidden" value={chatId} />
+      <input name="selectedSnapshot" type="hidden" value={selectedSnapshot} />
       <div className="rounded-3xl border border-input/80 bg-card/70 p-2 shadow-sm shadow-black/10 backdrop-blur focus-within:border-ring/70 focus-within:ring-2 focus-within:ring-ring/25">
         <div className="flex items-end gap-2">
           <div className="min-w-0 flex-1">
@@ -151,8 +158,9 @@ export function MessageComposerForm({ chatId }: MessageComposerFormProps) {
             className={
               displayedError ? "text-destructive" : "text-muted-foreground"
             }
+            role={displayedError ? "alert" : undefined}
           >
-            {displayedError ?? "ユーザーメッセージのみ保存されます。"}
+            {displayedError ?? "選択中の4oスナップショットで応答を生成します。"}
           </p>
           <span
             className={

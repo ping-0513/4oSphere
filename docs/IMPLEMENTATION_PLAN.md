@@ -112,6 +112,11 @@ Implement real streaming:
 
 Do not fake typing after full response receipt.
 
+The preceding Phase 3A integration uses the OpenAI Responses API in
+non-streaming mode, disables OpenAI response storage, uses no tools, and stores
+one completed assistant variant plus its active-variant pointer for each new
+user turn.
+
 After OpenAI API integration, add automatic chat-title generation:
 
 - Run after the first user message is sent only when the chat title is still

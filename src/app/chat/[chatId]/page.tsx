@@ -4,7 +4,7 @@ import { AppShell } from "@/components/app-shell";
 import { LoginPanel } from "@/components/auth/login-panel";
 import { getAuthenticatedAppContext } from "@/lib/auth";
 import { getVisibleChatById, listVisibleChats } from "@/lib/chats";
-import { listVisibleUserMessages } from "@/lib/messages";
+import { listVisibleChatMessages } from "@/lib/messages";
 
 export const dynamic = "force-dynamic";
 
@@ -36,7 +36,7 @@ export default async function ChatPage({ params }: ChatPageProps) {
     notFound();
   }
 
-  const messages = await listVisibleUserMessages(auth.supabase, currentChat.id);
+  const messages = await listVisibleChatMessages(auth.supabase, currentChat.id);
 
   return (
     <AppShell

@@ -5,8 +5,19 @@ import { revalidatePath } from "next/cache";
 import { getVerifiedUserId } from "@/lib/auth";
 import type { SendUserMessageState } from "@/lib/message-action-state";
 import { validateUserMessageContent } from "@/lib/message-validation";
-import { createUserMessageTurn, MessagePersistenceError } from "@/lib/messages";
+import {
+  createUserMessageTurn,
+  listConversationMessages,
+  MessagePersistenceError,
+  saveInitialAssistantResponse,
+} from "@/lib/messages";
+import { hasOpenAiApiKey } from "@/lib/openai/client";
+import { generateAssistantResponse } from "@/lib/openai/generate-assistant-response";
+import { getGpt4oApiModelId, isGpt4oSnapshotLabel } from "@/lib/openai/models";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+
+const GENERATION_FAILED_MESSAGE =
+  "メッセージは保存されましたが、応答生成に失敗しました。";
 
 export async function sendUserMessageAction(
   _previousState: SendUserMessageState,
@@ -14,15 +25,32 @@ export async function sendUserMessageAction(
 ): Promise<SendUserMessageState> {
   const chatId = formData.get("chatId");
   const contentRaw = formData.get("contentRaw");
+  const selectedSnapshot = formData.get("selectedSnapshot");
 
-  if (typeof chatId !== "string" || typeof contentRaw !== "string") {
-    return { error: "メッセージを保存できませんでした。", successId: null };
+  if (
+    typeof chatId !== "string" ||
+    typeof contentRaw !== "string" ||
+    typeof selectedSnapshot !== "string"
+  ) {
+    return {
+      error: "メッセージを保存できませんでした。",
+      generationFailed: false,
+      successId: null,
+    };
   }
 
   const validationError = validateUserMessageContent(contentRaw);
 
   if (validationError) {
-    return { error: validationError, successId: null };
+    return { error: validationError, generationFailed: false, successId: null };
+  }
+
+  if (!isGpt4oSnapshotLabel(selectedSnapshot)) {
+    return {
+      error: "選択されたモデルを使用できません。",
+      generationFailed: false,
+      successId: null,
+    };
   }
 
   const supabase = await createSupabaseServerClient();
@@ -31,6 +59,15 @@ export async function sendUserMessageAction(
   if (!userId) {
     return {
       error: "このチャットにメッセージを保存できません。",
+      generationFailed: false,
+      successId: null,
+    };
+  }
+
+  if (!hasOpenAiApiKey()) {
+    return {
+      error: "OpenAI APIが設定されていません。",
+      generationFailed: false,
       successId: null,
     };
   }
@@ -38,15 +75,47 @@ export async function sendUserMessageAction(
   try {
     const result = await createUserMessageTurn(supabase, chatId, contentRaw);
 
-    revalidatePath("/");
-    revalidatePath(`/chat/${chatId}`);
+    try {
+      const conversation = await listConversationMessages(supabase, chatId);
+      const generation = await generateAssistantResponse(
+        conversation,
+        selectedSnapshot,
+        getGpt4oApiModelId(selectedSnapshot),
+      );
 
-    return { error: null, successId: result.user_message_id };
+      await saveInitialAssistantResponse(supabase, result.turn_id, generation);
+
+      revalidatePath("/");
+      revalidatePath(`/chat/${chatId}`);
+
+      return {
+        error: null,
+        generationFailed: false,
+        successId: result.user_message_id,
+      };
+    } catch {
+      revalidatePath("/");
+      revalidatePath(`/chat/${chatId}`);
+
+      return {
+        error: GENERATION_FAILED_MESSAGE,
+        generationFailed: true,
+        successId: result.user_message_id,
+      };
+    }
   } catch (error) {
     if (error instanceof MessagePersistenceError) {
-      return { error: error.message, successId: null };
+      return {
+        error: error.message,
+        generationFailed: false,
+        successId: null,
+      };
     }
 
-    return { error: "メッセージを保存できませんでした。", successId: null };
+    return {
+      error: "メッセージを保存できませんでした。",
+      generationFailed: false,
+      successId: null,
+    };
   }
 }

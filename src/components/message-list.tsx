@@ -1,11 +1,12 @@
 import { createChatAction } from "@/app/chat/actions";
 import { MarkdownMessage } from "@/components/markdown-message";
 import { NewChatForm } from "@/components/new-chat-submit-button";
-import type { CurrentChat, PersistedUserMessage } from "@/types/chat";
+import { cn } from "@/lib/utils";
+import type { CurrentChat, PersistedChatMessage } from "@/types/chat";
 
 type MessageListProps = {
   currentChat: CurrentChat | null;
-  messages: PersistedUserMessage[];
+  messages: PersistedChatMessage[];
 };
 
 const timestampFormatter = new Intl.DateTimeFormat("ja-JP", {
@@ -42,17 +43,49 @@ export function MessageList({ currentChat, messages }: MessageListProps) {
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-5 pb-6">
         {messages.map((message) => (
           <article
-            className="ml-auto w-fit max-w-[78%] md:max-w-[70%]"
+            className={cn(
+              "w-fit max-w-[88%] md:max-w-[78%]",
+              message.role === "user" && "ml-auto max-w-[78%] md:max-w-[70%]",
+            )}
             key={message.id}
           >
-            <div className="rounded-3xl border border-primary/20 bg-primary/78 px-4 py-3 text-primary-foreground shadow-sm shadow-primary/10 backdrop-blur">
+            <div
+              className={cn(
+                "rounded-3xl border px-4 py-3 shadow-sm backdrop-blur",
+                message.role === "user"
+                  ? "border-primary/20 bg-primary/78 text-primary-foreground shadow-primary/10"
+                  : "border-border/70 bg-card/75 text-card-foreground shadow-black/10",
+              )}
+            >
               <div className="text-sm leading-6">
                 <MarkdownMessage content={message.contentRaw} />
               </div>
             </div>
-            <p className="mt-1.5 text-right text-xs text-muted-foreground">
-              {timestampFormatter.format(new Date(message.createdAt))}
-            </p>
+            <div
+              className={cn(
+                "mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground",
+                message.role === "user" && "justify-end text-right",
+              )}
+            >
+              <span>
+                {timestampFormatter.format(new Date(message.createdAt))}
+              </span>
+              {message.role === "assistant" ? (
+                <>
+                  <span>{message.apiModelId}</span>
+                  {message.inputTokens !== null &&
+                  message.outputTokens !== null ? (
+                    <span>
+                      {message.inputTokens.toLocaleString()} in /{" "}
+                      {message.outputTokens.toLocaleString()} out
+                    </span>
+                  ) : null}
+                  {message.latencyMs !== null ? (
+                    <span>{message.latencyMs.toLocaleString()} ms</span>
+                  ) : null}
+                </>
+              ) : null}
+            </div>
           </article>
         ))}
       </div>

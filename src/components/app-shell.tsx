@@ -8,17 +8,18 @@ import { ChatHeader } from "@/components/chat-header";
 import { MessageList } from "@/components/message-list";
 import { MobileDrawer } from "@/components/mobile-drawer";
 import { getChatDisplayTitle } from "@/lib/chat-display";
+import { DEFAULT_GPT_4O_SNAPSHOT } from "@/lib/openai/models";
 import type { AuthenticatedProfile } from "@/types/auth";
 import type {
   ChatListItem,
   CurrentChat,
-  PersistedUserMessage,
+  PersistedChatMessage,
 } from "@/types/chat";
 
 type AppShellProps = {
   chats: ChatListItem[];
   currentChat: CurrentChat | null;
-  messages: PersistedUserMessage[];
+  messages: PersistedChatMessage[];
   profile: AuthenticatedProfile;
 };
 
@@ -29,6 +30,9 @@ export function AppShell({
   profile,
 }: AppShellProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [selectedSnapshot, setSelectedSnapshot] = useState(
+    DEFAULT_GPT_4O_SNAPSHOT,
+  );
 
   return (
     <main className="flex h-dvh min-h-dvh overflow-hidden bg-background text-foreground">
@@ -51,9 +55,16 @@ export function AppShell({
             currentChat ? getChatDisplayTitle(currentChat.title) : null
           }
           onMenuClick={() => setDrawerOpen(true)}
+          onSelectedSnapshotChange={setSelectedSnapshot}
+          selectedSnapshot={selectedSnapshot}
         />
         <MessageList currentChat={currentChat} messages={messages} />
-        {currentChat ? <ChatComposer chatId={currentChat.id} /> : null}
+        {currentChat ? (
+          <ChatComposer
+            chatId={currentChat.id}
+            selectedSnapshot={selectedSnapshot}
+          />
+        ) : null}
       </section>
     </main>
   );

@@ -8,7 +8,8 @@
 This repository currently contains the Next.js, TypeScript, Tailwind CSS,
 component, linting, formatting, environment, Supabase Auth wiring, chat routing,
 chat creation, chat list loading, chat rename and soft delete, user-message
-persistence, and the Phase 1 app shell.
+persistence, non-streaming GPT-4o assistant responses, and the Phase 1 app
+shell.
 
 ## Local setup
 
@@ -32,6 +33,15 @@ local environments.
 
 Do not put Supabase service-role keys or private provider secrets in public
 client environment variables.
+
+Set the server-only OpenAI API key in `.env.local`:
+
+```text
+OPENAI_API_KEY=
+```
+
+Do not prefix the OpenAI API key with `NEXT_PUBLIC_`. It is read only by
+server-side helpers and must not be exposed to browser code.
 
 ## Google OAuth setup
 
@@ -70,7 +80,16 @@ existing data, so applying it can fail if existing rows violate those rules.
 User messages are saved through the authenticated-only
 `create_user_message_turn` RPC. The RPC uses `auth.uid()`, respects RLS, creates
 the message turn and user message atomically, and updates the chat ordering
-timestamp. Assistant responses, OpenAI calls, and streaming are deferred.
+timestamp.
+
+After a user message is saved, the server calls the OpenAI Responses API
+without streaming or tools. The selected GPT-4o snapshot is validated against
+the three supported formal model IDs, and the completed assistant response plus
+its active-variant pointer are saved atomically through the authenticated-only
+`save_initial_assistant_response` RPC. OpenAI response storage is disabled with
+`store: false`; the Supabase database remains the conversation source of truth.
+Regenerate, user edit, streaming, tools, and automatic title generation remain
+deferred.
 
 ## Verification
 
