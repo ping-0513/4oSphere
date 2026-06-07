@@ -141,7 +141,7 @@ export function ChatRenameDialog({
                 チャット名を変更
               </Dialog.Title>
               <Dialog.Description className="mt-1 text-sm leading-6 text-muted-foreground">
-                80文字以内の名前を入力してください。
+                40文字以内の名前を入力してください。
               </Dialog.Description>
             </div>
             <Dialog.Close asChild>

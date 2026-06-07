@@ -64,7 +64,7 @@ from the desktop sidebar or mobile drawer. Chat deletion only sets
 `chats.deleted_at`; the app does not grant or use hard-delete operations.
 
 The Phase 2E migration adds database checks that reject whitespace-only chat
-titles and titles longer than 80 characters. It intentionally does not rewrite
+titles and titles longer than 40 characters. It intentionally does not rewrite
 existing data, so applying it can fail if existing rows violate those rules.
 
 User messages are saved through the authenticated-only

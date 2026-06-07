@@ -112,6 +112,16 @@ Implement real streaming:
 
 Do not fake typing after full response receipt.
 
+After OpenAI API integration, add automatic chat-title generation:
+
+- Run after the first user message is sent only when the chat title is still
+  the initial default.
+- Use `4o-1120` / `gpt-4o-2024-11-20`.
+- Save the generated title to `chats.title`.
+- Never overwrite a title that the user manually renamed.
+- Limit generated titles to 40 characters.
+- Do not couple title generation failure to user-message persistence.
+
 ## Phase 5: message actions and metadata
 
 Add required message actions:
