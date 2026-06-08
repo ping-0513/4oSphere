@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import { AppSidebar } from "@/components/app-sidebar";
 import { ChatComposer } from "@/components/chat-composer";
@@ -35,6 +35,12 @@ export function AppShell({
   const [selectedSnapshot, setSelectedSnapshot] = useState(
     DEFAULT_GPT_4O_SNAPSHOT,
   );
+  const openSettings = useCallback(() => {
+    setSettingsOpen(true);
+  }, []);
+  const handleSettingsOpenChange = useCallback((open: boolean) => {
+    setSettingsOpen(open);
+  }, []);
 
   return (
     <main className="flex h-dvh min-h-dvh overflow-hidden bg-background text-foreground">
@@ -42,14 +48,14 @@ export function AppShell({
         chats={chats}
         className="hidden md:flex"
         currentChatId={currentChat?.id ?? null}
-        onSettingsClick={() => setSettingsOpen(true)}
+        onSettingsClick={openSettings}
         profile={profile}
       />
       <MobileDrawer
         chats={chats}
         currentChatId={currentChat?.id ?? null}
         onOpenChange={setDrawerOpen}
-        onSettingsClick={() => setSettingsOpen(true)}
+        onSettingsClick={openSettings}
         open={drawerOpen}
         profile={profile}
       />
@@ -74,12 +80,14 @@ export function AppShell({
           />
         ) : null}
       </section>
-      <ModelSettingsPanel
-        onOpenChange={setSettingsOpen}
-        onSelectedSnapshotChange={setSelectedSnapshot}
-        open={settingsOpen}
-        selectedSnapshot={selectedSnapshot}
-      />
+      {settingsOpen ? (
+        <ModelSettingsPanel
+          onOpenChange={handleSettingsOpenChange}
+          onSelectedSnapshotChange={setSelectedSnapshot}
+          open={settingsOpen}
+          selectedSnapshot={selectedSnapshot}
+        />
+      ) : null}
     </main>
   );
 }

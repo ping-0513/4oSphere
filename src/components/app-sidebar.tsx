@@ -79,7 +79,11 @@ export function AppSidebar({
           <Button
             aria-label="設定を開く"
             className="h-10 w-full justify-start rounded-2xl px-2"
-            onClick={onSettingsClick}
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              onSettingsClick();
+            }}
             title="設定を開く"
             variant="ghost"
           >

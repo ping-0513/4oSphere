@@ -67,6 +67,7 @@ export function ModelSettingsPanel({
   const [collapsedById, setCollapsedById] = useState<Record<string, boolean>>(
     {},
   );
+  const [collapseStateLoaded, setCollapseStateLoaded] = useState(false);
 
   useEffect(() => {
     if (!open) {
@@ -75,13 +76,14 @@ export function ModelSettingsPanel({
 
     const timeoutId = window.setTimeout(() => {
       setCollapsedById(loadCollapsedState());
+      setCollapseStateLoaded(true);
     }, 0);
 
     return () => window.clearTimeout(timeoutId);
   }, [open]);
 
   useEffect(() => {
-    if (!open) {
+    if (!open || !collapseStateLoaded) {
       return;
     }
 
@@ -89,7 +91,7 @@ export function ModelSettingsPanel({
       COLLAPSE_STORAGE_KEY,
       JSON.stringify(collapsedById),
     );
-  }, [collapsedById, open]);
+  }, [collapsedById, collapseStateLoaded, open]);
 
   const visibleCategories = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -118,8 +120,8 @@ export function ModelSettingsPanel({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-[80] bg-background/75 backdrop-blur-sm" />
-        <Dialog.Content className="fixed inset-x-2 top-2 z-[90] flex max-h-[calc(100dvh-1rem)] flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-2xl outline-none md:inset-x-auto md:left-1/2 md:w-[min(72rem,calc(100vw-2rem))] md:-translate-x-1/2">
+        <Dialog.Overlay className="fixed inset-0 z-[120] bg-background/75 backdrop-blur-sm" />
+        <Dialog.Content className="fixed inset-x-2 top-2 z-[130] flex max-h-[calc(100dvh-1rem)] flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-2xl outline-none md:inset-x-auto md:left-1/2 md:w-[min(72rem,calc(100vw-2rem))] md:-translate-x-1/2">
           <div className="flex shrink-0 items-start justify-between gap-3 border-b border-border/70 p-4">
             <div className="min-w-0">
               <Dialog.Title className="text-lg font-semibold leading-7">

@@ -40,7 +40,7 @@ export function MobileDrawer({
             currentChatId={currentChatId}
             onSettingsClick={() => {
               onOpenChange(false);
-              onSettingsClick();
+              window.setTimeout(onSettingsClick, 0);
             }}
             profile={profile}
           />
