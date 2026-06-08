@@ -137,6 +137,17 @@ The Phase 3C integration adds non-streaming assistant-response variants:
 - User-only turns without a completed active assistant response are not
   retryable in this phase.
 
+The Phase 4A settings shell adds the Settings > Model taxonomy:
+
+- Use the existing GPT-4o snapshot options only: `4o-0513`, `4o-0806`, `4o-1120`.
+- Show all 24 OpenAI API parent categories as metadata-driven accordion rows.
+- Treat the list as parent categories, not individual API parameters.
+- Distinguish OpenAI API category existence from 4oSphere implementation status.
+- Do not expose or edit API keys in browser UI.
+- Do not persist settings or add them to `settings_snapshot` yet.
+- Do not execute Administration, Files, Uploads, Vector Stores, Images, Audio,
+  Video, Realtime, Chat Completions, or Legacy APIs in this phase.
+
 ## Phase 5: message actions and metadata
 
 Add required message actions:

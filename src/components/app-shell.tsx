@@ -7,6 +7,7 @@ import { ChatComposer } from "@/components/chat-composer";
 import { ChatHeader } from "@/components/chat-header";
 import { MessageList } from "@/components/message-list";
 import { MobileDrawer } from "@/components/mobile-drawer";
+import { ModelSettingsPanel } from "@/components/settings/model-settings-panel";
 import { getChatDisplayTitle } from "@/lib/chat-display";
 import { DEFAULT_GPT_4O_SNAPSHOT } from "@/lib/openai/models";
 import type { AuthenticatedProfile } from "@/types/auth";
@@ -30,6 +31,7 @@ export function AppShell({
   profile,
 }: AppShellProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [selectedSnapshot, setSelectedSnapshot] = useState(
     DEFAULT_GPT_4O_SNAPSHOT,
   );
@@ -40,12 +42,14 @@ export function AppShell({
         chats={chats}
         className="hidden md:flex"
         currentChatId={currentChat?.id ?? null}
+        onSettingsClick={() => setSettingsOpen(true)}
         profile={profile}
       />
       <MobileDrawer
         chats={chats}
         currentChatId={currentChat?.id ?? null}
         onOpenChange={setDrawerOpen}
+        onSettingsClick={() => setSettingsOpen(true)}
         open={drawerOpen}
         profile={profile}
       />
@@ -70,6 +74,12 @@ export function AppShell({
           />
         ) : null}
       </section>
+      <ModelSettingsPanel
+        onOpenChange={setSettingsOpen}
+        onSelectedSnapshotChange={setSelectedSnapshot}
+        open={settingsOpen}
+        selectedSnapshot={selectedSnapshot}
+      />
     </main>
   );
 }

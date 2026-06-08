@@ -11,16 +11,18 @@ import type { ChatListItem } from "@/types/chat";
 type MobileDrawerProps = {
   chats: ChatListItem[];
   currentChatId: string | null;
-  open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSettingsClick: () => void;
+  open: boolean;
   profile: AuthenticatedProfile;
 };
 
 export function MobileDrawer({
   chats,
   currentChatId,
-  open,
   onOpenChange,
+  onSettingsClick,
+  open,
   profile,
 }: MobileDrawerProps) {
   return (
@@ -36,6 +38,10 @@ export function MobileDrawer({
             chats={chats}
             className="flex w-full border-r-0"
             currentChatId={currentChatId}
+            onSettingsClick={() => {
+              onOpenChange(false);
+              onSettingsClick();
+            }}
             profile={profile}
           />
           <Dialog.Close asChild>

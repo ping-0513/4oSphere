@@ -236,6 +236,14 @@ Important number handling:
 - Avoid the old bug where a `0` remains stuck in a setting field
 - Use validation before saving
 
+The Model settings screen starts as a taxonomy shell. It should list the parent
+OpenAI API setting areas first, then add individual controls in later phases.
+The shell must not imply that every official API category is already available
+inside 4oSphere. Use status labels such as implemented, planned, admin, legacy,
+needs-confirmation, and unsupported to separate official API taxonomy from
+4oSphere implementation state. API keys and administrator operations must not
+be exposed in the browser settings UI.
+
 ## 13. Metadata display
 
 Each metadata item must be independently toggleable:

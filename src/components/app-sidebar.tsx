@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { BookOpen, Settings } from "lucide-react";
 
@@ -10,15 +12,11 @@ import { cn } from "@/lib/utils";
 import type { AuthenticatedProfile } from "@/types/auth";
 import type { ChatListItem } from "@/types/chat";
 
-const navItems = [
-  { label: "ナレッジ管理", icon: BookOpen },
-  { label: "設定", icon: Settings },
-];
-
 type AppSidebarProps = {
   chats: ChatListItem[];
   className?: string;
   currentChatId: string | null;
+  onSettingsClick: () => void;
   profile: AuthenticatedProfile;
 };
 
@@ -26,6 +24,7 @@ export function AppSidebar({
   chats,
   className,
   currentChatId,
+  onSettingsClick,
   profile,
 }: AppSidebarProps) {
   return (
@@ -67,20 +66,26 @@ export function AppSidebar({
           aria-label="アプリナビゲーション"
           className="mt-4 shrink-0 space-y-1"
         >
-          {navItems.map((item) => {
-            const Icon = item.icon;
-
-            return (
-              <Button
-                className="h-10 w-full justify-start rounded-2xl px-2"
-                key={item.label}
-                variant="ghost"
-              >
-                <Icon aria-hidden="true" className="size-4" />
-                <span className="leading-none">{item.label}</span>
-              </Button>
-            );
-          })}
+          <Button
+            aria-label="ナレッジ管理を開く"
+            className="h-10 w-full justify-start rounded-2xl px-2"
+            disabled
+            title="ナレッジ管理は後続フェーズで追加します"
+            variant="ghost"
+          >
+            <BookOpen aria-hidden="true" className="size-4" />
+            <span className="leading-none">ナレッジ管理</span>
+          </Button>
+          <Button
+            aria-label="設定を開く"
+            className="h-10 w-full justify-start rounded-2xl px-2"
+            onClick={onSettingsClick}
+            title="設定を開く"
+            variant="ghost"
+          >
+            <Settings aria-hidden="true" className="size-4" />
+            <span className="leading-none">設定</span>
+          </Button>
         </nav>
         <AccountMenu displayName={profile.displayName} />
       </div>

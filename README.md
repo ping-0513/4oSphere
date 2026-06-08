@@ -106,6 +106,12 @@ and variant switching are intentionally limited to the latest visible turn.
 Older turns and user-only turns without a completed active assistant response
 cannot be operated on.
 
+The Settings > Model panel is a taxonomy shell for OpenAI API setting areas. It
+lists all 24 parent categories kept in `src/lib/openai/api-setting-categories.ts`
+with status badges, help text, search, filtering, and collapsible sections. It
+does not expose API keys, execute administration APIs, persist settings, or map
+the listed categories into request payloads yet.
+
 ## Verification
 
 ```powershell
