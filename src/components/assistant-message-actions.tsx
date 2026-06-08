@@ -14,10 +14,15 @@ import {
   switchActiveAssistantVariantAction,
 } from "@/app/chat/assistant-variant-actions";
 import { Button } from "@/components/ui/button";
+import {
+  serializeResponseSettingsForForm,
+  type ResponseSettings,
+} from "@/lib/openai/response-settings";
 import type { AssistantVariantSummary, Gpt4oSnapshotLabel } from "@/types/chat";
 
 type AssistantMessageActionsProps = {
   activeVariantId: string;
+  responseSettings: ResponseSettings;
   selectedSnapshot: Gpt4oSnapshotLabel;
   turnId: string;
   variants: AssistantVariantSummary[];
@@ -25,6 +30,7 @@ type AssistantMessageActionsProps = {
 
 export function AssistantMessageActions({
   activeVariantId,
+  responseSettings,
   selectedSnapshot,
   turnId,
   variants,
@@ -90,6 +96,10 @@ export function AssistantMessageActions({
 
       formData.set("turnId", turnId);
       formData.set("selectedSnapshot", selectedSnapshot);
+      formData.set(
+        "responseSettings",
+        serializeResponseSettingsForForm(responseSettings),
+      );
       return regenerateAssistantResponseAction(formData);
     }, "regenerate");
   }

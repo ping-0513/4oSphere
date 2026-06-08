@@ -20,6 +20,7 @@ import { hasOpenAiApiKey } from "@/lib/openai/client";
 import { generateAssistantResponse } from "@/lib/openai/generate-assistant-response";
 import { generateChatTitle } from "@/lib/openai/generate-chat-title";
 import { getGpt4oApiModelId, isGpt4oSnapshotLabel } from "@/lib/openai/models";
+import { parseResponseSettingsFormValue } from "@/lib/openai/response-settings";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 const GENERATION_FAILED_MESSAGE =
@@ -53,6 +54,7 @@ export async function sendUserMessageAction(
 ): Promise<SendUserMessageState> {
   const chatId = formData.get("chatId");
   const contentRaw = formData.get("contentRaw");
+  const responseSettingsValue = formData.get("responseSettings");
   const selectedSnapshot = formData.get("selectedSnapshot");
 
   if (
@@ -76,6 +78,28 @@ export async function sendUserMessageAction(
   if (!isGpt4oSnapshotLabel(selectedSnapshot)) {
     return {
       error: "選択されたモデルを使用できません。",
+      generationFailed: false,
+      successId: null,
+    };
+  }
+
+  const responseSettingsResult = parseResponseSettingsFormValue(
+    responseSettingsValue,
+  );
+
+  if (responseSettingsResult.error) {
+    return {
+      error: responseSettingsResult.error,
+      generationFailed: false,
+      successId: null,
+    };
+  }
+
+  const responseSettings = responseSettingsResult.settings;
+
+  if (!responseSettings) {
+    return {
+      error: "応答生成設定を読み取れませんでした。",
       generationFailed: false,
       successId: null,
     };
@@ -109,6 +133,7 @@ export async function sendUserMessageAction(
         conversation,
         selectedSnapshot,
         getGpt4oApiModelId(selectedSnapshot),
+        responseSettings,
       );
 
       await saveInitialAssistantResponse(supabase, result.turn_id, generation);

@@ -13,6 +13,7 @@ import { isUuid } from "@/lib/chats";
 import { hasOpenAiApiKey } from "@/lib/openai/client";
 import { generateAssistantResponse } from "@/lib/openai/generate-assistant-response";
 import { getGpt4oApiModelId, isGpt4oSnapshotLabel } from "@/lib/openai/models";
+import { parseResponseSettingsFormValue } from "@/lib/openai/response-settings";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 const VARIANT_ACTION_ERROR = "この回答は現在操作できません。";
@@ -22,6 +23,7 @@ export async function regenerateAssistantResponseAction(
   formData: FormData,
 ): Promise<AssistantVariantActionState> {
   const turnId = formData.get("turnId");
+  const responseSettingsValue = formData.get("responseSettings");
   const selectedSnapshot = formData.get("selectedSnapshot");
 
   if (
@@ -31,6 +33,20 @@ export async function regenerateAssistantResponseAction(
     !isGpt4oSnapshotLabel(selectedSnapshot) ||
     !hasOpenAiApiKey()
   ) {
+    return { error: REGENERATE_ERROR, success: false };
+  }
+
+  const responseSettingsResult = parseResponseSettingsFormValue(
+    responseSettingsValue,
+  );
+
+  if (responseSettingsResult.error) {
+    return { error: responseSettingsResult.error, success: false };
+  }
+
+  const responseSettings = responseSettingsResult.settings;
+
+  if (!responseSettings) {
     return { error: REGENERATE_ERROR, success: false };
   }
 
@@ -51,6 +67,7 @@ export async function regenerateAssistantResponseAction(
       context.conversation,
       selectedSnapshot,
       getGpt4oApiModelId(selectedSnapshot),
+      responseSettings,
     );
 
     await saveRegeneratedAssistantResponse(supabase, turnId, generation);

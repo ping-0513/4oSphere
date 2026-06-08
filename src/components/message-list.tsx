@@ -2,6 +2,7 @@ import { createChatAction } from "@/app/chat/actions";
 import { AssistantMessageActions } from "@/components/assistant-message-actions";
 import { MarkdownMessage } from "@/components/markdown-message";
 import { NewChatForm } from "@/components/new-chat-submit-button";
+import type { ResponseSettings } from "@/lib/openai/response-settings";
 import { cn } from "@/lib/utils";
 import type {
   CurrentChat,
@@ -12,6 +13,7 @@ import type {
 type MessageListProps = {
   currentChat: CurrentChat | null;
   messages: PersistedChatMessage[];
+  responseSettings: ResponseSettings;
   selectedSnapshot: Gpt4oSnapshotLabel;
 };
 
@@ -24,6 +26,7 @@ const timestampFormatter = new Intl.DateTimeFormat("ja-JP", {
 export function MessageList({
   currentChat,
   messages,
+  responseSettings,
   selectedSnapshot,
 }: MessageListProps) {
   if (!currentChat) {
@@ -99,6 +102,7 @@ export function MessageList({
             {message.role === "assistant" && message.isLatestTurn ? (
               <AssistantMessageActions
                 activeVariantId={message.id}
+                responseSettings={responseSettings}
                 selectedSnapshot={selectedSnapshot}
                 turnId={message.turnId}
                 variants={message.variants}

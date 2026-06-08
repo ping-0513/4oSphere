@@ -6,12 +6,14 @@ import { useEffect, useMemo, useState } from "react";
 
 import { ApiSettingCategoryCard } from "@/components/settings/api-setting-category-card";
 import { ModelSnapshotSelect } from "@/components/settings/model-snapshot-select";
+import { ResponsesSettingsSection } from "@/components/settings/responses-settings-section";
 import { Button } from "@/components/ui/button";
 import {
   API_SETTING_CATEGORIES,
   API_SETTING_STATUS_LABELS,
   type ApiSettingCategoryStatus,
 } from "@/lib/openai/api-setting-categories";
+import type { ResponseSettings } from "@/lib/openai/response-settings";
 import type { Gpt4oSnapshotLabel } from "@/types/chat";
 
 const COLLAPSE_STORAGE_KEY = "4osphere:model-settings-category-collapse";
@@ -29,8 +31,10 @@ type StatusFilter = (typeof STATUS_FILTERS)[number];
 
 type ModelSettingsPanelProps = {
   onOpenChange: (open: boolean) => void;
+  onResponseSettingsChange: (settings: ResponseSettings) => void;
   onSelectedSnapshotChange: (snapshot: Gpt4oSnapshotLabel) => void;
   open: boolean;
+  responseSettings: ResponseSettings;
   selectedSnapshot: Gpt4oSnapshotLabel;
 };
 
@@ -58,8 +62,10 @@ function loadCollapsedState() {
 
 export function ModelSettingsPanel({
   onOpenChange,
+  onResponseSettingsChange,
   onSelectedSnapshotChange,
   open,
+  responseSettings,
   selectedSnapshot,
 }: ModelSettingsPanelProps) {
   const [query, setQuery] = useState("");
@@ -232,7 +238,14 @@ export function ModelSettingsPanel({
                           [category.id]: !(current[category.id] ?? true),
                         }))
                       }
-                    />
+                    >
+                      {category.id === "responses" ? (
+                        <ResponsesSettingsSection
+                          onResponseSettingsChange={onResponseSettingsChange}
+                          responseSettings={responseSettings}
+                        />
+                      ) : null}
+                    </ApiSettingCategoryCard>
                   ))}
                   {!visibleCategories.length ? (
                     <p className="rounded-2xl border border-border/70 bg-card/70 p-4 text-sm text-muted-foreground">

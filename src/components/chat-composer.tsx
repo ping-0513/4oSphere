@@ -4,14 +4,20 @@ import { Globe, ImagePlus, Mic } from "lucide-react";
 
 import { MessageComposerForm } from "@/components/message-composer-form";
 import { Button } from "@/components/ui/button";
+import type { ResponseSettings } from "@/lib/openai/response-settings";
 import type { Gpt4oSnapshotLabel } from "@/types/chat";
 
 type ChatComposerProps = {
   chatId: string;
+  responseSettings: ResponseSettings;
   selectedSnapshot: Gpt4oSnapshotLabel;
 };
 
-export function ChatComposer({ chatId, selectedSnapshot }: ChatComposerProps) {
+export function ChatComposer({
+  chatId,
+  responseSettings,
+  selectedSnapshot,
+}: ChatComposerProps) {
   return (
     <footer className="shrink-0 border-t border-border/70 bg-background/90 px-3 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur md:px-6">
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-3">
@@ -52,6 +58,7 @@ export function ChatComposer({ chatId, selectedSnapshot }: ChatComposerProps) {
         </div>
         <MessageComposerForm
           chatId={chatId}
+          responseSettings={responseSettings}
           selectedSnapshot={selectedSnapshot}
         />
       </div>

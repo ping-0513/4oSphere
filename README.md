@@ -109,8 +109,18 @@ cannot be operated on.
 The Settings > Model panel is a taxonomy shell for OpenAI API setting areas. It
 lists all 24 parent categories kept in `src/lib/openai/api-setting-categories.ts`
 with status badges, help text, search, filtering, and collapsible sections. It
-does not expose API keys, execute administration APIs, persist settings, or map
-the listed categories into request payloads yet.
+does not expose API keys or execute administration APIs.
+
+The Responses category now includes session-only detail controls for the current
+non-streaming chat generation path. Developer instructions and custom user
+instructions are separate text fields; the normal user message remains the
+composer body. For normal send and regenerate, the server validates these values
+and combines them with explicit section labels into the Responses API
+`instructions` field. The settings are written to
+`assistant_response_variants.settings_snapshot` with schema version 2 for the
+generated assistant response, but they are not persisted to localStorage or a
+settings table. Title generation keeps its fixed prompt and model and does not
+use these chat response settings.
 
 ## Verification
 

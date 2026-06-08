@@ -10,6 +10,10 @@ import { MobileDrawer } from "@/components/mobile-drawer";
 import { ModelSettingsPanel } from "@/components/settings/model-settings-panel";
 import { getChatDisplayTitle } from "@/lib/chat-display";
 import { DEFAULT_GPT_4O_SNAPSHOT } from "@/lib/openai/models";
+import {
+  createDefaultResponseSettingsBySnapshot,
+  type ResponseSettings,
+} from "@/lib/openai/response-settings";
 import type { AuthenticatedProfile } from "@/types/auth";
 import type {
   ChatListItem,
@@ -35,12 +39,25 @@ export function AppShell({
   const [selectedSnapshot, setSelectedSnapshot] = useState(
     DEFAULT_GPT_4O_SNAPSHOT,
   );
+  const [responseSettingsBySnapshot, setResponseSettingsBySnapshot] = useState(
+    () => createDefaultResponseSettingsBySnapshot(),
+  );
+  const selectedResponseSettings = responseSettingsBySnapshot[selectedSnapshot];
   const openSettings = useCallback(() => {
     setSettingsOpen(true);
   }, []);
   const handleSettingsOpenChange = useCallback((open: boolean) => {
     setSettingsOpen(open);
   }, []);
+  const handleResponseSettingsChange = useCallback(
+    (settings: ResponseSettings) => {
+      setResponseSettingsBySnapshot((current) => ({
+        ...current,
+        [selectedSnapshot]: settings,
+      }));
+    },
+    [selectedSnapshot],
+  );
 
   return (
     <main className="flex h-dvh min-h-dvh overflow-hidden bg-background text-foreground">
@@ -71,11 +88,13 @@ export function AppShell({
         <MessageList
           currentChat={currentChat}
           messages={messages}
+          responseSettings={selectedResponseSettings}
           selectedSnapshot={selectedSnapshot}
         />
         {currentChat ? (
           <ChatComposer
             chatId={currentChat.id}
+            responseSettings={selectedResponseSettings}
             selectedSnapshot={selectedSnapshot}
           />
         ) : null}
@@ -83,8 +102,10 @@ export function AppShell({
       {settingsOpen ? (
         <ModelSettingsPanel
           onOpenChange={handleSettingsOpenChange}
+          onResponseSettingsChange={handleResponseSettingsChange}
           onSelectedSnapshotChange={setSelectedSnapshot}
           open={settingsOpen}
+          responseSettings={selectedResponseSettings}
           selectedSnapshot={selectedSnapshot}
         />
       ) : null}

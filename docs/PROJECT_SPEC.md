@@ -244,6 +244,15 @@ needs-confirmation, and unsupported to separate official API taxonomy from
 4oSphere implementation state. API keys and administrator operations must not
 be exposed in the browser settings UI.
 
+Responses settings are added incrementally. Developer instructions and custom
+user instructions must remain separate from the normal composer message in UI,
+validation, and settings snapshots. They may be composed into the Responses API
+`instructions` field with explicit labels for the current non-streaming
+generation path, but they must not be merged into the user message body or title
+generation prompt. Session-only Responses settings should not be written to
+localStorage or a database settings table until a dedicated persistence design is
+added.
+
 ## 13. Metadata display
 
 Each metadata item must be independently toggleable:

@@ -18,15 +18,21 @@ import {
   MAX_USER_MESSAGE_CHARACTERS,
   validateUserMessageContent,
 } from "@/lib/message-validation";
+import {
+  serializeResponseSettingsForForm,
+  type ResponseSettings,
+} from "@/lib/openai/response-settings";
 import type { Gpt4oSnapshotLabel } from "@/types/chat";
 
 type MessageComposerFormProps = {
   chatId: string;
+  responseSettings: ResponseSettings;
   selectedSnapshot: Gpt4oSnapshotLabel;
 };
 
 export function MessageComposerForm({
   chatId,
+  responseSettings,
   selectedSnapshot,
 }: MessageComposerFormProps) {
   const router = useRouter();
@@ -108,6 +114,11 @@ export function MessageComposerForm({
   return (
     <form action={formAction} onSubmit={handleSubmit}>
       <input name="chatId" type="hidden" value={chatId} />
+      <input
+        name="responseSettings"
+        type="hidden"
+        value={serializeResponseSettingsForForm(responseSettings)}
+      />
       <input name="selectedSnapshot" type="hidden" value={selectedSnapshot} />
       <div className="rounded-3xl border border-input/80 bg-card/70 p-2 shadow-sm shadow-black/10 backdrop-blur focus-within:border-ring/70 focus-within:ring-2 focus-within:ring-ring/25">
         <div className="flex items-end gap-2">

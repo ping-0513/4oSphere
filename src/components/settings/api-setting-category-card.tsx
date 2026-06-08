@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronDown } from "lucide-react";
+import type { ReactNode } from "react";
 
 import { SettingsHelpPopover } from "@/components/settings/settings-help-popover";
 import {
@@ -20,12 +21,14 @@ const statusClassNames = {
 
 type ApiSettingCategoryCardProps = {
   category: ApiSettingCategory;
+  children?: ReactNode;
   collapsed: boolean;
   onToggle: () => void;
 };
 
 export function ApiSettingCategoryCard({
   category,
+  children,
   collapsed,
   onToggle,
 }: ApiSettingCategoryCardProps) {
@@ -85,9 +88,11 @@ export function ApiSettingCategoryCard({
               <dt className="font-medium text-foreground">notes</dt>
               <dd>{category.notes}</dd>
             </dl>
-            <p className="rounded-xl border border-dashed border-border/80 px-3 py-2 text-xs text-muted-foreground">
-              このカテゴリの個別設定は後続フェーズで追加します。
-            </p>
+            {children ?? (
+              <p className="rounded-xl border border-dashed border-border/80 px-3 py-2 text-xs text-muted-foreground">
+                このカテゴリの個別設定は後続フェーズで追加します。
+              </p>
+            )}
           </div>
         ) : null}
       </div>

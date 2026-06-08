@@ -148,6 +148,26 @@ The Phase 4A settings shell adds the Settings > Model taxonomy:
 - Do not execute Administration, Files, Uploads, Vector Stores, Images, Audio,
   Video, Realtime, Chat Completions, or Legacy APIs in this phase.
 
+The Phase 4B Responses settings detail connects a small, safe subset of the
+Responses API settings to the current non-streaming chat generation path:
+
+- Developer instructions and custom user instructions are separate UI fields.
+- The normal user message remains the composer body and is not merged into
+  settings instructions.
+- Normal send and regenerate pass the validated session settings to the server.
+- The server combines developer and custom instructions with explicit section
+  labels into the Responses API `instructions` field.
+- `max_output_tokens`, `temperature`, and `top_p` are validated on the client
+  and server before any user message is saved.
+- `store: false`, `stream: false`, `tools: []`, and `tool_choice: none` remain
+  fixed.
+- The used settings are saved in `assistant_response_variants.settings_snapshot`
+  with schema version 2.
+- Settings are not persisted to localStorage or a database settings table in
+  this phase.
+- Title generation keeps its fixed `gpt-4o-2024-11-20` behavior and does not
+  use Responses settings.
+
 ## Phase 5: message actions and metadata
 
 Add required message actions:
