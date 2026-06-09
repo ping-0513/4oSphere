@@ -154,6 +154,12 @@ enable streaming, tools, multimodal input, or additional API calls.
 Code interpreter/container, MCP, computer use, image generation, and
 shell/apply-patch tool rows are inventory-only safety references. They expose
 no input, toggle, execution action, saved setting, or API connection.
+The lower API-reference categories also include a broader display-only
+inventory for Moderations, Files, Uploads, Vector Stores, Models, Batches,
+Fine-tuning, Evals, Graders, Webhooks, Containers, Skills, ChatKit,
+Administration, Legacy APIs, and Chat Completions. Create, update, delete,
+cancel, pause, resume, file, and administrator operations remain descriptive
+rows only and cannot be executed from Settings.
 
 ## Verification
 

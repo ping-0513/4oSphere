@@ -278,6 +278,11 @@ metadata, but must not silently enable a new API behavior.
 Dangerous or externally connected tool inventory rows must explicitly state
 that they cannot be enabled or executed from the settings UI. They must not
 render inputs, toggles, execution actions, or saved settings.
+Lower API-reference categories should retain a detailed inventory of lifecycle,
+status, security, file, evaluation, and administration concepts. Operation-like
+rows such as create, update, delete, cancel, pause, resume, publish, and
+administration actions are documentation only in Settings and must explicitly
+state that they cannot be enabled or executed there.
 
 ## 13. Metadata display
 

@@ -1,3 +1,5 @@
+import { LOWER_CATEGORY_INVENTORY_SEEDS } from "@/lib/openai/api-setting-lower-category-inventory";
+
 export type ApiSettingSubcategoryStatus =
   | "implemented"
   | "planned"
@@ -23,6 +25,7 @@ export type ApiSettingSubcategory = {
   uiPlacement: string;
   implementation: string;
   caution: string;
+  notes: string;
   what: string;
   effect: string;
   whenToUse: string;
@@ -42,6 +45,7 @@ type ApiSettingSubcategoryDefinition = Omit<
   | "displayStatusLabel"
   | "effect"
   | "nonTechnicalLabel"
+  | "notes"
   | "officialPath"
   | "order"
   | "recommendation"
@@ -109,12 +113,12 @@ export const API_SETTING_SUBCATEGORY_STATUS_LABELS = {
   fixed: "変更できません",
   placeholder: "棚卸しのみ",
   "needs-confirmation": "要確認",
-  admin: "サーバー管理",
-  legacy: "Legacy",
+  admin: "管理者・開発者向け",
+  legacy: "旧API",
   unsupported: "非対応",
 } satisfies Record<ApiSettingSubcategoryStatus, string>;
 
-const API_SETTING_SUBCATEGORY_DEFINITIONS = [
+const BASE_API_SETTING_SUBCATEGORY_DEFINITIONS = [
   {
     id: "common-api-key",
     categoryId: "common",
@@ -1675,6 +1679,19 @@ const API_SETTING_SUBCATEGORY_DEFINITIONS = [
   },
 ] as const satisfies readonly ApiSettingSubcategoryDefinition[];
 
+const API_SETTING_SUBCATEGORY_DEFINITIONS: readonly ApiSettingSubcategoryDefinition[] =
+  [
+    ...BASE_API_SETTING_SUBCATEGORY_DEFINITIONS,
+    ...LOWER_CATEGORY_INVENTORY_SEEDS.map((seed) => ({
+      ...seed,
+      caution:
+        "この画面からは有効化・実行できません。入力欄、toggle、実行ボタン、API接続、保存対象は追加しません。",
+      detailDescription: `${seed.shortDescription} OpenAI API Reference上の棚卸し候補として表示しますが、4oSphereの現Phaseでは実行しません。`,
+      implementation: "display-only inventory; not connected",
+      phase: "Inventory only",
+    })),
+  ];
+
 const subcategoryOrderByCategory = new Map<string, number>();
 const CATEGORY_CANONICAL_ORDER = [
   "responses",
@@ -1796,34 +1813,44 @@ function getDefaultFriendlyCopy(
       };
     case "admin":
       return {
-        effect: "組織やサーバー全体へ影響する可能性があります。",
-        whenToUse: "管理者が運用方針を検討するときに確認します。",
-        recommendation: "通常ユーザーは触らず、管理者の判断に任せます。",
+        effect:
+          "組織やサーバー全体へ影響する可能性があります。この画面からは有効化・実行できません。",
+        whenToUse: "管理者が運用方針を検討するときだけ確認します。",
+        recommendation:
+          "通常ユーザーは触りません。入力欄、toggle、実行ボタンは追加しません。",
       };
     case "legacy":
       return {
-        effect: "以前の方式との互換性に関係します。",
+        effect:
+          "以前の方式との互換性に関係します。この画面からは有効化・実行できません。",
         whenToUse: "古い実装との互換性を調べるときだけ確認します。",
-        recommendation: "新しく使い始める場合は現在のAPI機能を優先します。",
+        recommendation:
+          "新しく使い始める場合は現在のAPI機能を優先し、旧APIの実行UIは追加しません。",
       };
     case "unsupported":
       return {
-        effect: "4oSphereの現在の設計では利用しません。",
+        effect:
+          "4oSphereの現在の設計では利用しません。この画面からは有効化・実行できません。",
         whenToUse: "非対応の理由を確認したいときに見ます。",
-        recommendation: "変更せず、現在対応している機能を使います。",
+        recommendation:
+          "非対応のままにします。入力欄、toggle、実行ボタンは追加しません。",
       };
     case "needs-confirmation":
       return {
-        effect: "対応可否や安全な使い方がまだ確定していません。",
+        effect:
+          "対応可否や安全な使い方がまだ確定しておらず、この画面からは有効化・実行できません。",
         whenToUse: "将来の対応範囲を検討するときに確認します。",
-        recommendation: "公式仕様と安全性の確認が終わるまで変更しません。",
+        recommendation:
+          "公式仕様と安全性の確認が終わるまで、入力欄、toggle、実行ボタンは追加しません。",
       };
     case "planned":
     case "placeholder":
       return {
-        effect: "現在は説明だけで、チャット生成の動作は変わりません。",
+        effect:
+          "この画面からは有効化・実行できません。現在は説明だけで、チャット生成の動作も変わりません。",
         whenToUse: "今後追加される可能性のある設定を確認するときに見ます。",
-        recommendation: "実装されるまで触る必要はありません。",
+        recommendation:
+          "今は棚卸しのみです。入力欄、toggle、実行ボタンは追加しません。",
       };
   }
 }
@@ -1864,6 +1891,7 @@ export const API_SETTING_SUBCATEGORIES =
           : API_SETTING_SUBCATEGORY_STATUS_LABELS[subcategory.status],
       effect: friendlyCopy.effect,
       nonTechnicalLabel: subcategory.japaneseName,
+      notes: subcategory.detailDescription,
       officialPath: `API Reference > ${subcategory.uiPlacement} > ${subcategory.officialName}`,
       order,
       categoryNumber,

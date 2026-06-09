@@ -199,6 +199,10 @@ Responses API settings to the current non-streaming chat generation path:
   reference review as display-only metadata. Do not connect these audit rows to
   OpenAI requests until a dedicated implementation phase validates support and
   safety.
+- Expand the lower API-reference categories with display-only lifecycle,
+  status, file, evaluation, webhook, container, skill, ChatKit,
+  administration, and legacy-operation inventory. These rows must expose no
+  input, toggle, execution action, persistence, or API connection.
 
 ## Phase 5: message actions and metadata
 
