@@ -109,18 +109,34 @@ cannot be operated on.
 The Settings > Model panel is a taxonomy shell for OpenAI API setting areas. It
 lists all 24 parent categories kept in `src/lib/openai/api-setting-categories.ts`
 with status badges, help text, search, filtering, and collapsible sections. It
-does not expose API keys or execute administration APIs.
+also shows child setting candidates from
+`src/lib/openai/api-setting-subcategories.ts` so broad API surfaces remain
+visible even when they are deferred. It does not expose API keys or execute
+administration APIs.
+
+Parent categories use the canonical display order defined in
+`API_SETTING_CATEGORY_CANONICAL_ORDER`, beginning with Responses and then
+Common. Child setting rows carry `officialName`, `japaneseName`, `displayName`,
+and `order`; search and status filters only remove non-matching rows and do not
+reorder the remaining metadata.
 
 The Responses category now includes session-only detail controls for the current
 non-streaming chat generation path. Developer instructions and custom user
 instructions are separate text fields; the normal user message remains the
 composer body. For normal send and regenerate, the server validates these values
 and combines them with explicit section labels into the Responses API
-`instructions` field. The settings are written to
+`instructions` field. Edits stay as draft values until the user applies them;
+only applied session settings are used by the next normal send or regenerate.
+Applied settings are restored within the same browser tab through
+`sessionStorage`; they are not account or database settings. The settings used
+for a generated response are written to
 `assistant_response_variants.settings_snapshot` with schema version 2 for the
 generated assistant response, but they are not persisted to localStorage or a
 settings table. Title generation keeps its fixed prompt and model and does not
-use these chat response settings.
+use these chat response settings. Responses settings that are not explicitly
+connected to the current non-streaming chat path remain visible as fixed,
+planned, placeholder, unsupported, needs-confirmation, admin, or legacy rows and
+are not sent to the OpenAI API.
 
 ## Verification
 

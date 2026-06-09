@@ -241,17 +241,25 @@ OpenAI API setting areas first, then add individual controls in later phases.
 The shell must not imply that every official API category is already available
 inside 4oSphere. Use status labels such as implemented, planned, admin, legacy,
 needs-confirmation, and unsupported to separate official API taxonomy from
-4oSphere implementation state. API keys and administrator operations must not
-be exposed in the browser settings UI.
+4oSphere implementation state. Child setting candidates should remain visible
+as implemented, fixed, placeholder, planned, needs-confirmation, admin, legacy,
+or unsupported rows so broad API coverage is not silently narrowed. API keys
+and administrator operations must not be exposed in the browser settings UI.
+The normal parent-category order starts with Responses, then Common, followed by
+the remaining canonical API taxonomy. Parent and child rows must show both an
+official-like English name and Japanese label, and filtering must preserve their
+metadata-defined relative order.
 
 Responses settings are added incrementally. Developer instructions and custom
 user instructions must remain separate from the normal composer message in UI,
 validation, and settings snapshots. They may be composed into the Responses API
 `instructions` field with explicit labels for the current non-streaming
 generation path, but they must not be merged into the user message body or title
-generation prompt. Session-only Responses settings should not be written to
-localStorage or a database settings table until a dedicated persistence design is
-added.
+generation prompt. Editing a Responses setting should create a draft first;
+normal send and regenerate should use only explicitly applied session settings.
+Session-only Responses settings may be restored within the current browser tab
+with `sessionStorage`, but should not be written to localStorage or a database
+settings table until a dedicated persistence design is added.
 
 ## 13. Metadata display
 

@@ -147,6 +147,13 @@ The Phase 4A settings shell adds the Settings > Model taxonomy:
 - Do not persist settings or add them to `settings_snapshot` yet.
 - Do not execute Administration, Files, Uploads, Vector Stores, Images, Audio,
   Video, Realtime, Chat Completions, or Legacy APIs in this phase.
+- Keep child setting candidates visible under each parent category via metadata.
+  Deferred surfaces should be organized with status badges and placeholder rows
+  instead of being removed.
+- Preserve the canonical parent order beginning with Responses and then Common.
+  Every child setting candidate must keep an explicit Japanese label,
+  bilingual display name, and metadata order. Search/filter operations must not
+  reorder remaining items.
 
 The Phase 4B Responses settings detail connects a small, safe subset of the
 Responses API settings to the current non-streaming chat generation path:
@@ -154,6 +161,8 @@ Responses API settings to the current non-streaming chat generation path:
 - Developer instructions and custom user instructions are separate UI fields.
 - The normal user message remains the composer body and is not merged into
   settings instructions.
+- UI edits remain draft values until the user applies them; discarding resets
+  the draft to the currently applied session settings.
 - Normal send and regenerate pass the validated session settings to the server.
 - The server combines developer and custom instructions with explicit section
   labels into the Responses API `instructions` field.
@@ -165,8 +174,16 @@ Responses API settings to the current non-streaming chat generation path:
   with schema version 2.
 - Settings are not persisted to localStorage or a database settings table in
   this phase.
+- Applied settings may be restored within the current browser tab through
+  `sessionStorage`; this must store only Responses settings, never API keys or
+  provider secrets.
+- Closing the settings panel with unsaved draft changes should require explicit
+  confirmation before those draft changes are discarded.
 - Title generation keeps its fixed `gpt-4o-2024-11-20` behavior and does not
   use Responses settings.
+- Settings not listed as payload-connected in this phase remain display-only
+  shell rows. They must not be added to OpenAI payloads or
+  `settings_snapshot`.
 
 ## Phase 5: message actions and metadata
 

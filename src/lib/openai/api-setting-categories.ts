@@ -8,6 +8,7 @@ export type ApiSettingCategoryStatus =
 
 export type ApiSettingCategory = {
   id: string;
+  displayOrder: number;
   officialName: string;
   japaneseName: string;
   displayName: string;
@@ -22,6 +23,137 @@ export type ApiSettingCategory = {
   notes: string;
 };
 
+type ApiSettingCategoryDefinition = Omit<ApiSettingCategory, "displayOrder">;
+
+export const API_SETTING_CATEGORY_CANONICAL_ORDER = [
+  "responses",
+  "common",
+  "conversations",
+  "chat-completions",
+  "realtime",
+  "audio",
+  "images",
+  "videos",
+  "embeddings",
+  "moderations",
+  "files",
+  "uploads",
+  "vector-stores",
+  "models",
+  "batches",
+  "fine-tuning",
+  "evals",
+  "graders",
+  "webhooks",
+  "containers",
+  "skills",
+  "chatkit",
+  "administration",
+  "legacy-apis",
+] as const;
+
+const API_SETTING_CATEGORY_JAPANESE_METADATA = {
+  responses: {
+    japaneseName: "応答生成",
+    shortDescription: "AIに入力を渡して返事を作る中心機能",
+  },
+  common: {
+    japaneseName: "共通設定",
+    shortDescription: "すべてのAPI呼び出しに関係する基本設定",
+  },
+  conversations: {
+    japaneseName: "会話管理",
+    shortDescription: "会話の流れや履歴を管理する機能",
+  },
+  "chat-completions": {
+    japaneseName: "チャット補完",
+    shortDescription: "メッセージ形式でAIに返事を作らせる旧来の主要API",
+  },
+  realtime: {
+    japaneseName: "リアルタイム通信",
+    shortDescription: "音声や会話を低遅延でやり取りする機能",
+  },
+  audio: {
+    japaneseName: "音声",
+    shortDescription: "音声を文字にしたり、文字を音声にする機能",
+  },
+  images: {
+    japaneseName: "画像",
+    shortDescription: "画像を作る・編集する・変化させる機能",
+  },
+  videos: {
+    japaneseName: "動画",
+    shortDescription: "動画を作る・編集する・延長する機能",
+  },
+  embeddings: {
+    japaneseName: "埋め込み",
+    shortDescription: "テキストなどを検索しやすい数値データに変換する機能",
+  },
+  moderations: {
+    japaneseName: "安全性判定",
+    shortDescription: "入力や出力が危険でないか判定する機能",
+  },
+  files: {
+    japaneseName: "ファイル",
+    shortDescription: "APIで使うファイルを管理する機能",
+  },
+  uploads: {
+    japaneseName: "大容量アップロード",
+    shortDescription: "大きなファイルを分割してアップロードする機能",
+  },
+  "vector-stores": {
+    japaneseName: "ベクトルストア",
+    shortDescription: "AIが参照する検索用データ置き場",
+  },
+  models: {
+    japaneseName: "モデル",
+    shortDescription: "利用できるAIモデルを確認・管理する機能",
+  },
+  batches: {
+    japaneseName: "バッチ処理",
+    shortDescription: "大量のAPIリクエストをまとめて非同期実行する機能",
+  },
+  "fine-tuning": {
+    japaneseName: "ファインチューニング",
+    shortDescription: "モデルを自分のデータで追加学習させる機能",
+  },
+  evals: {
+    japaneseName: "評価",
+    shortDescription: "AIの出力品質をテストする機能",
+  },
+  graders: {
+    japaneseName: "採点器・評価器",
+    shortDescription: "回答を自動採点するルールや仕組み",
+  },
+  webhooks: {
+    japaneseName: "Webhook",
+    shortDescription: "処理完了などのイベント通知を受け取る機能",
+  },
+  containers: {
+    japaneseName: "実行コンテナ",
+    shortDescription: "コード実行や作業用の隔離環境",
+  },
+  skills: {
+    japaneseName: "スキル",
+    shortDescription: "再利用できる作業手順や機能パック",
+  },
+  chatkit: {
+    japaneseName: "ChatKit",
+    shortDescription: "チャットUIやスレッドを組み込むための機能",
+  },
+  administration: {
+    japaneseName: "管理者設定",
+    shortDescription: "組織・プロジェクト・権限・利用量を管理する機能",
+  },
+  "legacy-apis": {
+    japaneseName: "旧API・非推奨API",
+    shortDescription: "以前の方式として残っているAPI",
+  },
+} satisfies Record<
+  (typeof API_SETTING_CATEGORY_CANONICAL_ORDER)[number],
+  { japaneseName: string; shortDescription: string }
+>;
+
 export const API_SETTING_STATUS_LABELS = {
   implemented: "一部実装済み",
   planned: "実装予定",
@@ -31,7 +163,7 @@ export const API_SETTING_STATUS_LABELS = {
   unsupported: "非対応",
 } satisfies Record<ApiSettingCategoryStatus, string>;
 
-export const API_SETTING_CATEGORIES = [
+const API_SETTING_CATEGORY_DEFINITIONS = [
   {
     id: "common",
     officialName: "Common",
@@ -427,4 +559,26 @@ export const API_SETTING_CATEGORIES = [
     isImplemented: false,
     notes: "新規実装の中心にはしません。互換用途の親カテゴリとして残します。",
   },
-] as const satisfies readonly ApiSettingCategory[];
+] as const satisfies readonly ApiSettingCategoryDefinition[];
+
+export const API_SETTING_CATEGORIES = API_SETTING_CATEGORY_CANONICAL_ORDER.map(
+  (categoryId, index) => {
+    const category = API_SETTING_CATEGORY_DEFINITIONS.find(
+      (candidate) => candidate.id === categoryId,
+    );
+
+    if (!category) {
+      throw new Error(`Missing API setting category metadata: ${categoryId}`);
+    }
+
+    return {
+      ...category,
+      displayOrder: index + 1,
+      displayName: `${category.officialName} / ${API_SETTING_CATEGORY_JAPANESE_METADATA[categoryId].japaneseName}`,
+      japaneseName:
+        API_SETTING_CATEGORY_JAPANESE_METADATA[categoryId].japaneseName,
+      shortDescription:
+        API_SETTING_CATEGORY_JAPANESE_METADATA[categoryId].shortDescription,
+    };
+  },
+) satisfies readonly ApiSettingCategory[];

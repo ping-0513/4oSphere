@@ -4,6 +4,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
+import { ApiSettingPlaceholderSection } from "@/components/settings/api-setting-placeholder-section";
 import { ApiSettingCategoryCard } from "@/components/settings/api-setting-category-card";
 import { ModelSnapshotSelect } from "@/components/settings/model-snapshot-select";
 import { ResponsesSettingsSection } from "@/components/settings/responses-settings-section";
@@ -13,7 +14,16 @@ import {
   API_SETTING_STATUS_LABELS,
   type ApiSettingCategoryStatus,
 } from "@/lib/openai/api-setting-categories";
-import type { ResponseSettings } from "@/lib/openai/response-settings";
+import { getApiSettingSubcategories } from "@/lib/openai/api-setting-subcategories";
+import {
+  createResponseSettingsDraft,
+  createResponseSettingsDraftBySnapshot,
+  isResponseSettingsDraftApplied,
+  validateResponseSettingsDraft,
+  type ResponseSettingsBySnapshot,
+  type ResponseSettingsDraftBySnapshot,
+  type ResponseSettingsFieldErrors,
+} from "@/lib/openai/response-settings";
 import type { Gpt4oSnapshotLabel } from "@/types/chat";
 
 const COLLAPSE_STORAGE_KEY = "4osphere:model-settings-category-collapse";
@@ -31,10 +41,13 @@ type StatusFilter = (typeof STATUS_FILTERS)[number];
 
 type ModelSettingsPanelProps = {
   onOpenChange: (open: boolean) => void;
-  onResponseSettingsChange: (settings: ResponseSettings) => void;
+  onResponseSettingsApply: (
+    snapshot: Gpt4oSnapshotLabel,
+    settings: ResponseSettingsBySnapshot[Gpt4oSnapshotLabel],
+  ) => void;
   onSelectedSnapshotChange: (snapshot: Gpt4oSnapshotLabel) => void;
   open: boolean;
-  responseSettings: ResponseSettings;
+  responseSettingsBySnapshot: ResponseSettingsBySnapshot;
   selectedSnapshot: Gpt4oSnapshotLabel;
 };
 
@@ -62,10 +75,10 @@ function loadCollapsedState() {
 
 export function ModelSettingsPanel({
   onOpenChange,
-  onResponseSettingsChange,
+  onResponseSettingsApply,
   onSelectedSnapshotChange,
   open,
-  responseSettings,
+  responseSettingsBySnapshot,
   selectedSnapshot,
 }: ModelSettingsPanelProps) {
   const [query, setQuery] = useState("");
@@ -73,7 +86,33 @@ export function ModelSettingsPanel({
   const [collapsedById, setCollapsedById] = useState<Record<string, boolean>>(
     {},
   );
+  const [draftSettingsBySnapshot, setDraftSettingsBySnapshot] =
+    useState<ResponseSettingsDraftBySnapshot>(() =>
+      createResponseSettingsDraftBySnapshot(responseSettingsBySnapshot),
+    );
+  const [responseSettingsErrors, setResponseSettingsErrors] =
+    useState<ResponseSettingsFieldErrors>({});
+  const [responseSettingsStatus, setResponseSettingsStatus] = useState<
+    "idle" | "saved" | "saving"
+  >("idle");
   const [collapseStateLoaded, setCollapseStateLoaded] = useState(false);
+  const selectedAppliedResponseSettings =
+    responseSettingsBySnapshot[selectedSnapshot];
+  const selectedDraftResponseSettings =
+    draftSettingsBySnapshot[selectedSnapshot];
+  const responseSettingsDirty = !isResponseSettingsDraftApplied(
+    selectedDraftResponseSettings,
+    selectedAppliedResponseSettings,
+  );
+  const hasAnyUnsavedResponseSettings = Object.entries(
+    draftSettingsBySnapshot,
+  ).some(
+    ([snapshot, draft]) =>
+      !isResponseSettingsDraftApplied(
+        draft,
+        responseSettingsBySnapshot[snapshot as Gpt4oSnapshotLabel],
+      ),
+  );
 
   useEffect(() => {
     if (!open) {
@@ -112,6 +151,15 @@ export function ModelSettingsPanel({
         category.detailDescription,
         category.officialPath,
         category.notes,
+        ...getApiSettingSubcategories(category.id).flatMap((subcategory) => [
+          subcategory.officialName,
+          subcategory.japaneseName,
+          subcategory.shortDescription,
+          subcategory.detailDescription,
+          subcategory.uiPlacement,
+          subcategory.implementation,
+          subcategory.caution,
+        ]),
       ]
         .join(" ")
         .toLowerCase();
@@ -123,8 +171,68 @@ export function ModelSettingsPanel({
     });
   }, [query, statusFilter]);
 
+  function handlePanelOpenChange(nextOpen: boolean) {
+    if (!nextOpen && hasAnyUnsavedResponseSettings) {
+      const shouldDiscard = window.confirm(
+        "未保存の変更があります。破棄して閉じますか？",
+      );
+
+      if (!shouldDiscard) {
+        return;
+      }
+    }
+
+    onOpenChange(nextOpen);
+  }
+
+  function handleSelectedSnapshotChange(snapshot: Gpt4oSnapshotLabel) {
+    setResponseSettingsErrors({});
+    setResponseSettingsStatus("idle");
+    onSelectedSnapshotChange(snapshot);
+  }
+
+  function handleResponseSettingsDraftChange(
+    draft: ResponseSettingsDraftBySnapshot[Gpt4oSnapshotLabel],
+  ) {
+    setDraftSettingsBySnapshot((current) => ({
+      ...current,
+      [selectedSnapshot]: draft,
+    }));
+    setResponseSettingsErrors({});
+    setResponseSettingsStatus("idle");
+  }
+
+  function handleResponseSettingsDiscard() {
+    setDraftSettingsBySnapshot((current) => ({
+      ...current,
+      [selectedSnapshot]: createResponseSettingsDraft(
+        selectedAppliedResponseSettings,
+      ),
+    }));
+    setResponseSettingsErrors({});
+    setResponseSettingsStatus("idle");
+  }
+
+  function handleResponseSettingsSave() {
+    const result = validateResponseSettingsDraft(selectedDraftResponseSettings);
+
+    if (result.error || !result.settings) {
+      setResponseSettingsErrors(result.fieldErrors);
+      setResponseSettingsStatus("idle");
+      return;
+    }
+
+    setResponseSettingsErrors({});
+    setResponseSettingsStatus("saving");
+    onResponseSettingsApply(selectedSnapshot, result.settings);
+
+    window.setTimeout(() => {
+      setResponseSettingsStatus("saved");
+    }, 150);
+  }
+
   return (
-    <Dialog.Root open={open} onOpenChange={onOpenChange}>
+    <Dialog.Root open={open} onOpenChange={handlePanelOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-[120] bg-background/75 backdrop-blur-sm" />
         <Dialog.Content className="fixed inset-x-2 top-2 z-[130] flex max-h-[calc(100dvh-1rem)] flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-2xl outline-none md:inset-x-auto md:left-1/2 md:w-[min(72rem,calc(100vw-2rem))] md:-translate-x-1/2">
@@ -163,7 +271,7 @@ export function ModelSettingsPanel({
                   <ModelSnapshotSelect
                     buttonClassName="mt-3 w-full"
                     menuClassName="w-full"
-                    onSelectedSnapshotChange={onSelectedSnapshotChange}
+                    onSelectedSnapshotChange={handleSelectedSnapshotChange}
                     selectedSnapshot={selectedSnapshot}
                   />
                 </section>
@@ -227,26 +335,53 @@ export function ModelSettingsPanel({
                   </p>
                 </div>
                 <div className="space-y-3">
-                  {visibleCategories.map((category) => (
-                    <ApiSettingCategoryCard
-                      category={category}
-                      collapsed={collapsedById[category.id] ?? true}
-                      key={category.id}
-                      onToggle={() =>
-                        setCollapsedById((current) => ({
-                          ...current,
-                          [category.id]: !(current[category.id] ?? true),
-                        }))
-                      }
-                    >
-                      {category.id === "responses" ? (
-                        <ResponsesSettingsSection
-                          onResponseSettingsChange={onResponseSettingsChange}
-                          responseSettings={responseSettings}
-                        />
-                      ) : null}
-                    </ApiSettingCategoryCard>
-                  ))}
+                  {visibleCategories.map((category) => {
+                    const subcategories = getApiSettingSubcategories(
+                      category.id,
+                    );
+
+                    return (
+                      <ApiSettingCategoryCard
+                        category={category}
+                        collapsed={collapsedById[category.id] ?? true}
+                        key={category.id}
+                        onToggle={() =>
+                          setCollapsedById((current) => ({
+                            ...current,
+                            [category.id]: !(current[category.id] ?? true),
+                          }))
+                        }
+                      >
+                        {category.id === "responses" ? (
+                          <>
+                            <ResponsesSettingsSection
+                              dirty={responseSettingsDirty}
+                              draftSettings={selectedDraftResponseSettings}
+                              fieldErrors={responseSettingsErrors}
+                              onDiscard={handleResponseSettingsDiscard}
+                              onDraftSettingsChange={
+                                handleResponseSettingsDraftChange
+                              }
+                              onSave={handleResponseSettingsSave}
+                              saveStatus={responseSettingsStatus}
+                              selectedSnapshot={selectedSnapshot}
+                            />
+                            <ApiSettingPlaceholderSection
+                              categoryDisplayName={category.displayName}
+                              subcategories={subcategories.filter(
+                                (subcategory) => subcategory.order >= 14,
+                              )}
+                            />
+                          </>
+                        ) : (
+                          <ApiSettingPlaceholderSection
+                            categoryDisplayName={category.displayName}
+                            subcategories={subcategories}
+                          />
+                        )}
+                      </ApiSettingCategoryCard>
+                    );
+                  })}
                   {!visibleCategories.length ? (
                     <p className="rounded-2xl border border-border/70 bg-card/70 p-4 text-sm text-muted-foreground">
                       条件に一致するカテゴリはありません。

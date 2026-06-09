@@ -50,11 +50,8 @@ export function ApiSettingCategoryCard({
               )}
             />
             <span className="min-w-0">
-              <span className="block truncate text-sm font-semibold leading-6 text-foreground">
-                {category.officialName}
-              </span>
-              <span className="block truncate text-xs leading-5 text-muted-foreground">
-                {category.japaneseName}
+              <span className="block text-sm font-semibold leading-6 text-foreground">
+                {category.displayName}
               </span>
             </span>
           </span>

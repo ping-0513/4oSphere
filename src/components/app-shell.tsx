@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { AppSidebar } from "@/components/app-sidebar";
 import { ChatComposer } from "@/components/chat-composer";
@@ -12,12 +12,17 @@ import { getChatDisplayTitle } from "@/lib/chat-display";
 import { DEFAULT_GPT_4O_SNAPSHOT } from "@/lib/openai/models";
 import {
   createDefaultResponseSettingsBySnapshot,
+  parseResponseSettingsBySnapshotSessionValue,
+  RESPONSE_SETTINGS_SESSION_STORAGE_KEY,
+  serializeResponseSettingsBySnapshotForSession,
+  type ResponseSettingsBySnapshot,
   type ResponseSettings,
 } from "@/lib/openai/response-settings";
 import type { AuthenticatedProfile } from "@/types/auth";
 import type {
   ChatListItem,
   CurrentChat,
+  Gpt4oSnapshotLabel,
   PersistedChatMessage,
 } from "@/types/chat";
 
@@ -43,20 +48,52 @@ export function AppShell({
     () => createDefaultResponseSettingsBySnapshot(),
   );
   const selectedResponseSettings = responseSettingsBySnapshot[selectedSnapshot];
+  useEffect(() => {
+    let storedSettings: ResponseSettingsBySnapshot | null = null;
+
+    try {
+      storedSettings = parseResponseSettingsBySnapshotSessionValue(
+        window.sessionStorage.getItem(RESPONSE_SETTINGS_SESSION_STORAGE_KEY),
+      );
+    } catch {
+      storedSettings = null;
+    }
+
+    if (storedSettings) {
+      const restoreTimer = window.setTimeout(() => {
+        setResponseSettingsBySnapshot(storedSettings);
+      }, 0);
+
+      return () => window.clearTimeout(restoreTimer);
+    }
+  }, []);
   const openSettings = useCallback(() => {
     setSettingsOpen(true);
   }, []);
   const handleSettingsOpenChange = useCallback((open: boolean) => {
     setSettingsOpen(open);
   }, []);
-  const handleResponseSettingsChange = useCallback(
-    (settings: ResponseSettings) => {
-      setResponseSettingsBySnapshot((current) => ({
-        ...current,
-        [selectedSnapshot]: settings,
-      }));
+  const handleResponseSettingsApply = useCallback(
+    (snapshot: Gpt4oSnapshotLabel, settings: ResponseSettings) => {
+      setResponseSettingsBySnapshot((current) => {
+        const next = {
+          ...current,
+          [snapshot]: settings,
+        };
+
+        try {
+          window.sessionStorage.setItem(
+            RESPONSE_SETTINGS_SESSION_STORAGE_KEY,
+            serializeResponseSettingsBySnapshotForSession(next),
+          );
+        } catch {
+          // Applied settings still live in AppShell state for this mounted app.
+        }
+
+        return next;
+      });
     },
-    [selectedSnapshot],
+    [],
   );
 
   return (
@@ -102,10 +139,10 @@ export function AppShell({
       {settingsOpen ? (
         <ModelSettingsPanel
           onOpenChange={handleSettingsOpenChange}
-          onResponseSettingsChange={handleResponseSettingsChange}
+          onResponseSettingsApply={handleResponseSettingsApply}
           onSelectedSnapshotChange={setSelectedSnapshot}
           open={settingsOpen}
-          responseSettings={selectedResponseSettings}
+          responseSettingsBySnapshot={responseSettingsBySnapshot}
           selectedSnapshot={selectedSnapshot}
         />
       ) : null}
