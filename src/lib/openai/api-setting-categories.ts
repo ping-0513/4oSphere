@@ -59,7 +59,8 @@ const API_SETTING_CATEGORY_JAPANESE_METADATA = {
   },
   common: {
     japaneseName: "共通設定",
-    shortDescription: "すべてのAPI呼び出しに関係する基本設定",
+    shortDescription:
+      "OpenAI APIへの接続・認証・運用に関する項目です。秘密情報や管理者向け情報を含むため、通常のモデル設定としては編集できません。",
   },
   conversations: {
     japaneseName: "会話管理",
@@ -126,7 +127,7 @@ const API_SETTING_CATEGORY_JAPANESE_METADATA = {
     shortDescription: "回答を自動採点するルールや仕組み",
   },
   webhooks: {
-    japaneseName: "Webhook",
+    japaneseName: "イベント通知",
     shortDescription: "処理完了などのイベント通知を受け取る機能",
   },
   containers: {
@@ -138,7 +139,7 @@ const API_SETTING_CATEGORY_JAPANESE_METADATA = {
     shortDescription: "再利用できる作業手順や機能パック",
   },
   chatkit: {
-    japaneseName: "ChatKit",
+    japaneseName: "チャット組み込み",
     shortDescription: "チャットUIやスレッドを組み込むための機能",
   },
   administration: {
@@ -464,8 +465,8 @@ const API_SETTING_CATEGORY_DEFINITIONS = [
   {
     id: "webhooks",
     officialName: "Webhooks",
-    japaneseName: "Webhook",
-    displayName: "Webhooks / Webhook",
+    japaneseName: "イベント通知",
+    displayName: "Webhooks / イベント通知",
     shortDescription: "処理完了などのイベント通知を受け取る機能",
     detailDescription:
       "非同期処理やイベントが発生したときに、自分のサーバーへ通知を送ってもらう仕組みです。完了待ちをずっと監視しなくてよくなります。",
@@ -513,8 +514,8 @@ const API_SETTING_CATEGORY_DEFINITIONS = [
   {
     id: "chatkit",
     officialName: "ChatKit",
-    japaneseName: "ChatKit",
-    displayName: "ChatKit / ChatKit",
+    japaneseName: "チャット組み込み",
+    displayName: "ChatKit / チャット組み込み",
     shortDescription: "チャットUIやスレッドを組み込むための機能",
     detailDescription:
       "自分のアプリにチャット体験を組み込むための機能です。セッション、スレッド、チャット項目などを扱います。",

@@ -150,8 +150,8 @@ function TextareaSetting({
             >
               {number}. {label}
             </label>
-            <span className="rounded-full border border-primary/35 bg-primary/10 px-2 py-1 text-[11px] font-medium leading-none text-primary">
-              変更できます
+            <span className="rounded-full border border-emerald-400/35 bg-emerald-400/10 px-2 py-1 text-[11px] font-medium leading-none text-emerald-300">
+              保存すると生成に使われます
             </span>
           </div>
           <SettingExplanation
@@ -227,8 +227,8 @@ function NumberSetting({
             <p className="text-sm font-medium leading-6 text-foreground">
               {number}. {label}
             </p>
-            <span className="rounded-full border border-primary/35 bg-primary/10 px-2 py-1 text-[11px] font-medium leading-none text-primary">
-              変更できます
+            <span className="rounded-full border border-emerald-400/35 bg-emerald-400/10 px-2 py-1 text-[11px] font-medium leading-none text-emerald-300">
+              保存すると生成に使われます
             </span>
           </div>
           <SettingExplanation
@@ -298,7 +298,7 @@ function FixedSettingRow({
   value: string;
 }) {
   return (
-    <div className="flex items-start justify-between gap-3 rounded-xl border border-border/70 bg-card/50 px-3 py-2">
+    <div className="flex items-start justify-between gap-3 rounded-xl border border-blue-400/25 bg-blue-400/5 px-3 py-2">
       <div>
         <p className="text-sm font-medium leading-6 text-foreground">
           {number}. {label}
@@ -332,9 +332,7 @@ function FixedSettingRow({
         <span className="rounded-full border border-border/70 bg-background px-2 py-1 text-xs text-muted-foreground">
           {value}
         </span>
-        <span className="text-[11px] text-muted-foreground">
-          ここでは変更不可
-        </span>
+        <span className="text-[11px] text-blue-300">ここでは変更不可</span>
       </div>
     </div>
   );
@@ -360,7 +358,9 @@ function SaveActionBar({
           <p
             aria-live="polite"
             className={
-              dirty ? "text-sm font-medium text-primary" : "text-sm font-medium"
+              dirty
+                ? "text-sm font-medium text-amber-300"
+                : "text-sm font-medium text-emerald-300"
             }
           >
             {saving
@@ -449,8 +449,8 @@ export function ResponsesSettingsSection({
       </div>
 
       <section className="space-y-3">
-        <SectionTitle description="文字入力系は通常メッセージと分けて扱います。">
-          基本設定
+        <SectionTitle description="ここで編集して保存した内容だけが、次回の送信と再生成で使われます。">
+          現在保存される設定
         </SectionTitle>
         <TextareaSetting
           detail="Responses APIのinstructionsへ反映します。4oSphere側・開発者側がモデルに守らせたい基本方針です。通常メッセージ本文とは結合しません。"
@@ -484,6 +484,77 @@ export function ResponsesSettingsSection({
           shortDescription="通常メッセージ本文とは別の任意指示です。"
           value={draftSettings.customUserInstructions}
         />
+        <NumberSetting
+          detail="Responses APIのmax_output_tokensに反映します。大きいほど長い応答を許容します。"
+          effect="小さくすると回答が短く切れやすくなり、大きくすると長い回答を許可します。"
+          enabled={draftSettings.specifyMaxOutputTokens}
+          error={fieldErrors.maxOutputTokens}
+          guidance="回答が長すぎる、または長い回答を許可したいときだけ指定します。"
+          id="response-max-output-tokens"
+          label="max_output_tokens / 最大出力トークン"
+          max={MAX_MAX_OUTPUT_TOKENS}
+          min={MIN_MAX_OUTPUT_TOKENS}
+          onChange={(maxOutputTokens) => update({ maxOutputTokens })}
+          onEnabledChange={(specifyMaxOutputTokens) =>
+            update({
+              maxOutputTokens: specifyMaxOutputTokens
+                ? draftSettings.maxOutputTokens
+                : "",
+              specifyMaxOutputTokens,
+            })
+          }
+          number="1-7"
+          recommendation="通常はOFFのままAPIデフォルトに任せます。目安は短め512、標準1024、長め2048、最大寄り4096です。"
+          shortDescription="応答の長さの上限です。品質を上げる設定ではありません。"
+          step={1}
+          value={draftSettings.maxOutputTokens}
+        />
+        <NumberSetting
+          detail="Responses APIのtemperatureに反映します。高いほど揺らぎが増えます。top_pと同時に大きく動かすと挙動が読みづらくなります。"
+          effect="低いほど安定しやすく、高いほど多様・意外な返答になりやすくなります。賢さそのものを上げる設定ではありません。"
+          enabled={draftSettings.specifyTemperature}
+          error={fieldErrors.temperature}
+          guidance="回答が毎回ぶれすぎる、または創作的に広げたいときだけ指定します。"
+          id="response-temperature"
+          label="temperature / 温度サンプリング"
+          max={MAX_TEMPERATURE}
+          min={MIN_TEMPERATURE}
+          onChange={(temperature) => update({ temperature })}
+          onEnabledChange={(specifyTemperature) =>
+            update({
+              specifyTemperature,
+              temperature: specifyTemperature ? draftSettings.temperature : "",
+            })
+          }
+          number="1-8"
+          recommendation="通常はOFFです。安定寄りは0.2〜0.5、標準寄りは0.7前後、創作寄りは1.0前後が目安です。top_pと同時に変えないでください。"
+          shortDescription="返答候補の選び方の広がりを調整します。"
+          step={0.1}
+          value={draftSettings.temperature}
+        />
+        <NumberSetting
+          detail="Responses APIのtop_pに反映します。候補トークンの確率質量を制限します。temperatureと同時に大きく動かす場合は注意してください。"
+          effect="小さくすると有力な単語候補に絞り、大きくすると幅広い候補から選びます。"
+          enabled={draftSettings.specifyTopP}
+          error={fieldErrors.topP}
+          guidance="候補の選び方を細かく調整したい場合だけ指定します。"
+          id="response-top-p"
+          label="top_p / 候補範囲"
+          max={MAX_TOP_P}
+          min={MIN_TOP_P}
+          onChange={(topP) => update({ topP })}
+          onEnabledChange={(specifyTopP) =>
+            update({
+              specifyTopP,
+              topP: specifyTopP ? draftSettings.topP : "",
+            })
+          }
+          number="1-9"
+          recommendation="通常はOFFのままAPIデフォルトに任せます。基本はtemperatureかtop_pのどちらか一方だけを調整します。"
+          shortDescription="候補に入れる単語の範囲を確率で絞る設定です。"
+          step={0.05}
+          value={draftSettings.topP}
+        />
       </section>
 
       <section className="space-y-3">
@@ -514,82 +585,11 @@ export function ResponsesSettingsSection({
           number="1-6"
           value={selectedSnapshot}
         />
-        <NumberSetting
-          detail="Responses APIのmax_output_tokensに反映します。大きいほど長い応答を許容します。"
-          effect="小さくすると回答が短く切れやすくなり、大きくすると長い回答を許可します。"
-          enabled={draftSettings.specifyMaxOutputTokens}
-          error={fieldErrors.maxOutputTokens}
-          guidance="回答が長すぎる、または長い回答を許可したいときだけ指定します。"
-          id="response-max-output-tokens"
-          label="max_output_tokens / 最大出力トークン"
-          max={MAX_MAX_OUTPUT_TOKENS}
-          min={MIN_MAX_OUTPUT_TOKENS}
-          onChange={(maxOutputTokens) => update({ maxOutputTokens })}
-          onEnabledChange={(specifyMaxOutputTokens) =>
-            update({
-              maxOutputTokens: specifyMaxOutputTokens
-                ? draftSettings.maxOutputTokens
-                : "",
-              specifyMaxOutputTokens,
-            })
-          }
-          number="1-7"
-          recommendation="通常はOFFのままAPIデフォルトに任せます。指定すると長さと料金に影響します。"
-          shortDescription="応答で生成できる最大トークン数です。"
-          step={1}
-          value={draftSettings.maxOutputTokens}
-        />
-        <NumberSetting
-          detail="Responses APIのtemperatureに反映します。高いほど揺らぎが増えます。top_pと同時に大きく動かすと挙動が読みづらくなります。"
-          effect="低いほど安定しやすく、高いほど多様・意外な返答になりやすくなります。"
-          enabled={draftSettings.specifyTemperature}
-          error={fieldErrors.temperature}
-          guidance="回答が毎回ぶれすぎる、または創作的に広げたいときだけ指定します。"
-          id="response-temperature"
-          label="temperature / 温度サンプリング"
-          max={MAX_TEMPERATURE}
-          min={MIN_TEMPERATURE}
-          onChange={(temperature) => update({ temperature })}
-          onEnabledChange={(specifyTemperature) =>
-            update({
-              specifyTemperature,
-              temperature: specifyTemperature ? draftSettings.temperature : "",
-            })
-          }
-          number="1-8"
-          recommendation="通常はOFFのままAPIデフォルトに任せます。top_pと同時に変えないでください。"
-          shortDescription="応答の候補選びの広がりです。低いほど安定し、高いほど多様になりやすくなります。"
-          step={0.1}
-          value={draftSettings.temperature}
-        />
-        <NumberSetting
-          detail="Responses APIのtop_pに反映します。候補トークンの確率質量を制限します。temperatureと同時に大きく動かす場合は注意してください。"
-          effect="小さくすると有力な候補に絞り、大きくすると幅広い候補から選びます。"
-          enabled={draftSettings.specifyTopP}
-          error={fieldErrors.topP}
-          guidance="候補の選び方を細かく調整したい場合だけ指定します。"
-          id="response-top-p"
-          label="top_p / 確率質量"
-          max={MAX_TOP_P}
-          min={MIN_TOP_P}
-          onChange={(topP) => update({ topP })}
-          onEnabledChange={(specifyTopP) =>
-            update({
-              specifyTopP,
-              topP: specifyTopP ? draftSettings.topP : "",
-            })
-          }
-          number="1-9"
-          recommendation="通常はOFFのままAPIデフォルトに任せます。temperatureと同時に変えないでください。"
-          shortDescription="候補の絞り込み幅を調整します。"
-          step={0.05}
-          value={draftSettings.topP}
-        />
       </section>
 
       <section className="space-y-3">
-        <SectionTitle description="Phase 4Bでは安全側の固定値だけを使います。">
-          保存・実行方式
+        <SectionTitle description="安全のため現在は変更できない設定です。">
+          固定設定
         </SectionTitle>
         <FixedSettingRow
           detail="OpenAI側には会話を保存せず、4oSphere側で管理します。"

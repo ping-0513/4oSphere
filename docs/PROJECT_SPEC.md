@@ -267,6 +267,17 @@ Optional numeric Responses settings should start unset and clearly show that
 the OpenAI API default will be used. They must be omitted from the API request
 and settings snapshot until the user explicitly enables and supplies a valid
 value.
+Every settings child row should provide concise Japanese guidance for what the
+item is, what changing it would do, when it is appropriate, the recommended
+default posture, and important risks. Normal UI copy should avoid unexplained
+API jargon; technical paths and internal handling belong in developer details.
+Rows must visually distinguish editable settings, fixed/server-managed values,
+inventory-only placeholders, needs-confirmation items, and administrator or
+dangerous surfaces. API-reference audit findings may be added as display-only
+metadata, but must not silently enable a new API behavior.
+Dangerous or externally connected tool inventory rows must explicitly state
+that they cannot be enabled or executed from the settings UI. They must not
+render inputs, toggles, execution actions, or saved settings.
 
 ## 13. Metadata display
 

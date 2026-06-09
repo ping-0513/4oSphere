@@ -189,6 +189,16 @@ Responses API settings to the current non-streaming chat generation path:
 - Settings not listed as payload-connected in this phase remain display-only
   shell rows. They must not be added to OpenAI payloads or
   `settings_snapshot`.
+- Enrich every child metadata row with concise Japanese guidance for meaning,
+  effect, appropriate use, recommendation, and risk. Keep official paths and
+  internal handling in developer details.
+- Preserve canonical parent and child numbers through search and filtering, and
+  use semantic status treatments to distinguish editable, fixed/server-managed,
+  inventory-only, needs-confirmation, and administrator-facing rows.
+- Record additional Responses Create fields and tool families found during API
+  reference review as display-only metadata. Do not connect these audit rows to
+  OpenAI requests until a dedicated implementation phase validates support and
+  safety.
 
 ## Phase 5: message actions and metadata
 

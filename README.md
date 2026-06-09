@@ -143,6 +143,18 @@ connected to the current non-streaming chat path remain visible as fixed,
 planned, placeholder, unsupported, needs-confirmation, admin, or legacy rows and
 are not sent to the OpenAI API.
 
+The settings inventory also provides plain-Japanese guidance for every child
+row: what it is, what changes, when to use it, a recommendation, and a risk
+note. Stable canonical numbers remain visible after search and filtering.
+Editable, fixed/server-managed, inventory-only, needs-confirmation, and
+administrator-facing rows use distinct status labels and colors. The Responses
+inventory includes display-only coverage for additional Create Response fields
+and tool families found during the API reference audit; these rows do not
+enable streaming, tools, multimodal input, or additional API calls.
+Code interpreter/container, MCP, computer use, image generation, and
+shell/apply-patch tool rows are inventory-only safety references. They expose
+no input, toggle, execution action, saved setting, or API connection.
+
 ## Verification
 
 ```powershell

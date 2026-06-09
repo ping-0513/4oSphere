@@ -279,22 +279,34 @@ export function ModelSettingsPanel({
                   <h2 className="text-sm font-semibold leading-6">見分け方</h2>
                   <div className="mt-2 grid gap-2 text-xs leading-6 text-muted-foreground">
                     <p>
-                      <span className="mr-2 rounded-full border border-primary/35 bg-primary/10 px-2 py-1 text-primary">
-                        変更できます
+                      <span className="mr-2 rounded-full border border-emerald-400/35 bg-emerald-400/10 px-2 py-1 text-emerald-300">
+                        緑
                       </span>
-                      入力欄や切り替えがあります。
+                      保存すると生成に使われる設定
                     </p>
                     <p>
-                      <span className="mr-2 rounded-full border border-border bg-background px-2 py-1">
-                        変更できません
+                      <span className="mr-2 rounded-full border border-blue-400/35 bg-blue-400/10 px-2 py-1 text-blue-300">
+                        青
                       </span>
-                      現在の固定動作を説明します。
+                      サーバー側で固定・管理される設定
                     </p>
                     <p>
-                      <span className="mr-2 rounded-full border border-dashed border-border px-2 py-1">
-                        説明・棚卸し用
+                      <span className="mr-2 rounded-full border border-zinc-400/30 bg-zinc-400/10 px-2 py-1 text-zinc-300">
+                        灰
                       </span>
                       点線の項目はまだ画面から使えません。
+                    </p>
+                    <p>
+                      <span className="mr-2 rounded-full border border-violet-400/35 bg-violet-400/10 px-2 py-1 text-violet-300">
+                        紫
+                      </span>
+                      公式仕様や対応可否の確認が必要
+                    </p>
+                    <p>
+                      <span className="mr-2 rounded-full border border-red-400/35 bg-red-400/10 px-2 py-1 text-red-300">
+                        赤
+                      </span>
+                      管理者向け・危険操作に関係
                     </p>
                   </div>
                 </section>
@@ -392,6 +404,7 @@ export function ModelSettingsPanel({
                             <ApiSettingPlaceholderSection
                               categoryDisplayName={category.displayName}
                               categoryDisplayOrder={category.displayOrder}
+                              heading="後続で追加する項目"
                               subcategories={subcategories.filter(
                                 (subcategory) => subcategory.order >= 14,
                               )}

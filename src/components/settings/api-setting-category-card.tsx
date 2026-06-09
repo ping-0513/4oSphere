@@ -11,9 +11,9 @@ import {
 import { cn } from "@/lib/utils";
 
 const statusClassNames = {
-  implemented: "border-primary/35 bg-primary/12 text-primary shadow-primary/10",
-  planned: "border-sky-400/30 bg-sky-400/10 text-sky-200",
-  admin: "border-amber-400/35 bg-amber-400/10 text-amber-200",
+  implemented: "border-emerald-400/35 bg-emerald-400/10 text-emerald-300",
+  planned: "border-zinc-400/30 bg-zinc-400/10 text-zinc-300",
+  admin: "border-red-400/35 bg-red-400/10 text-red-300",
   legacy: "border-zinc-400/30 bg-zinc-400/10 text-zinc-200",
   "needs-confirmation": "border-violet-400/35 bg-violet-400/10 text-violet-200",
   unsupported: "border-destructive/35 bg-destructive/10 text-destructive",
@@ -32,23 +32,29 @@ export function ApiSettingCategoryCard({
   collapsed,
   onToggle,
 }: ApiSettingCategoryCardProps) {
+  const contentId = `settings-category-${category.id}-content`;
+
   return (
     <article className="rounded-2xl border border-border/70 bg-card/70 shadow-sm shadow-black/10">
       <div className="flex items-start gap-2 p-3">
         <button
+          aria-controls={contentId}
           aria-expanded={!collapsed}
-          className="min-w-0 flex-1 rounded-xl text-left outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+          aria-label={`${category.displayName} を${collapsed ? "開く" : "閉じる"}`}
+          className="min-w-0 flex-1 cursor-pointer rounded-xl p-1 text-left outline-none transition-colors hover:bg-accent/60 focus-visible:ring-2 focus-visible:ring-ring/50"
           onClick={onToggle}
           type="button"
         >
           <span className="flex min-w-0 items-center gap-2">
-            <ChevronDown
-              aria-hidden="true"
-              className={cn(
-                "size-4 shrink-0 text-muted-foreground transition-transform",
-                collapsed && "-rotate-90",
-              )}
-            />
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-border bg-background shadow-sm">
+              <ChevronDown
+                aria-hidden="true"
+                className={cn(
+                  "size-4 text-muted-foreground transition-transform",
+                  collapsed && "-rotate-90",
+                )}
+              />
+            </span>
             <span className="min-w-0">
               <span className="block text-sm font-semibold leading-6 text-foreground">
                 {category.displayOrder}. {category.displayName}
@@ -75,7 +81,10 @@ export function ApiSettingCategoryCard({
           {category.shortDescription}
         </p>
         {!collapsed ? (
-          <div className="mt-3 space-y-3 rounded-xl border border-border/70 bg-background/35 p-3 text-sm leading-6">
+          <div
+            className="mt-3 space-y-3 rounded-xl border border-border/70 bg-background/35 p-3 text-sm leading-6"
+            id={contentId}
+          >
             {children ?? (
               <p className="rounded-xl border border-dashed border-border/80 px-3 py-2 text-xs text-muted-foreground">
                 このカテゴリの個別設定は後続フェーズで追加します。

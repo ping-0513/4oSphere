@@ -23,11 +23,33 @@ export type ApiSettingSubcategory = {
   uiPlacement: string;
   implementation: string;
   caution: string;
+  what: string;
+  effect: string;
+  whenToUse: string;
+  recommendation: string;
+  risk: string;
+  nonTechnicalLabel: string;
+  technicalLabel: string;
+  displayStatusLabel: string;
+  categoryNumber: number;
+  subcategoryNumber: number;
 };
 
 type ApiSettingSubcategoryDefinition = Omit<
   ApiSettingSubcategory,
-  "displayName" | "officialPath" | "order"
+  | "categoryNumber"
+  | "displayName"
+  | "displayStatusLabel"
+  | "effect"
+  | "nonTechnicalLabel"
+  | "officialPath"
+  | "order"
+  | "recommendation"
+  | "risk"
+  | "subcategoryNumber"
+  | "technicalLabel"
+  | "what"
+  | "whenToUse"
 >;
 
 export const RESPONSES_SUBCATEGORY_CANONICAL_ORDER = [
@@ -65,6 +87,20 @@ export const RESPONSES_SUBCATEGORY_CANONICAL_ORDER = [
   "responses-audio-input",
   "responses-file-input",
   "responses-web-file-function-tools",
+  "responses-input",
+  "responses-stream-options",
+  "responses-text-verbosity",
+  "responses-prompt",
+  "responses-web-search-tool",
+  "responses-file-search-tool",
+  "responses-function-tool",
+  "responses-code-interpreter-tool",
+  "responses-top-logprobs",
+  "responses-deprecated-user",
+  "responses-mcp-tool",
+  "responses-computer-use-tool",
+  "responses-image-generation-tool",
+  "responses-shell-apply-patch-tool",
 ] as const;
 
 export const API_SETTING_SUBCATEGORY_STATUS_LABELS = {
@@ -366,7 +402,7 @@ const API_SETTING_SUBCATEGORY_DEFINITIONS = [
     categoryId: "responses",
     officialName: "max_output_tokens",
     japaneseName: "最大出力トークン",
-    shortDescription: "応答の最大出力量です。",
+    shortDescription: "応答の長さの上限です。品質を上げる設定ではありません。",
     detailDescription:
       "未指定ならAPIデフォルトを使います。指定する場合は1〜4096の整数として画面とserver actionで検証し、APIへ送る設定とsettings_snapshotへ反映します。",
     status: "implemented",
@@ -394,8 +430,8 @@ const API_SETTING_SUBCATEGORY_DEFINITIONS = [
     id: "responses-top-p",
     categoryId: "responses",
     officialName: "top_p",
-    japaneseName: "確率質量",
-    shortDescription: "候補トークンの絞り込み幅です。",
+    japaneseName: "候補範囲",
+    shortDescription: "候補に入れる単語の範囲を確率で絞る設定です。",
     detailDescription:
       "未指定ならAPIデフォルトを使います。指定する場合は0〜1の範囲で検証し、normal sendとregenerateに反映します。",
     status: "implemented",
@@ -753,6 +789,211 @@ const API_SETTING_SUBCATEGORY_DEFINITIONS = [
     uiPlacement: "Responses > Tools",
     implementation: "not connected",
     caution: "web/file/function toolsは実行しません。",
+  },
+  {
+    id: "responses-input",
+    categoryId: "responses",
+    officialName: "input",
+    japaneseName: "入力内容",
+    shortDescription: "AIへ渡すメッセージや入力素材をまとめた内容です。",
+    detailDescription:
+      "Responses Createのinputです。現在は保存済み会話履歴と通常メッセージからサーバー側で組み立てます。",
+    status: "fixed",
+    phase: "Phase 3A+",
+    uiPlacement: "Responses > Input composition",
+    implementation: "constructed from DB conversation history",
+    caution: "生のinput配列を直接編集するUIは追加しません。",
+  },
+  {
+    id: "responses-stream-options",
+    categoryId: "responses",
+    officialName: "stream_options",
+    japaneseName: "ストリーミング追加設定",
+    shortDescription:
+      "返答を少しずつ表示するときの追加動作を指定する設定です。",
+    detailDescription:
+      "stream=trueで使う追加設定です。4oSphereはstream:false固定のため、現在は利用しません。",
+    status: "placeholder",
+    phase: "Future streaming phase",
+    uiPlacement: "Responses > Streaming",
+    implementation: "not connected",
+    caution: "ストリーミング実処理と停止・再接続設計なしに有効化しません。",
+  },
+  {
+    id: "responses-text-verbosity",
+    categoryId: "responses",
+    officialName: "text.verbosity",
+    japaneseName: "回答の詳しさ",
+    shortDescription: "回答を簡潔にするか詳しくするかを指定する設定候補です。",
+    detailDescription:
+      "Responses Createのtext.verbosity候補です。GPT-4o snapshotでの対応可否とSDK型を公式確認してから扱います。",
+    status: "needs-confirmation",
+    phase: "Future",
+    uiPlacement: "Responses > Output format",
+    implementation: "not connected",
+    caution: "4o-only allowlistで利用可能か確認できるまでAPIへ送りません。",
+  },
+  {
+    id: "responses-prompt",
+    categoryId: "responses",
+    officialName: "prompt",
+    japaneseName: "保存済みプロンプト",
+    shortDescription:
+      "OpenAI側で管理する再利用可能な指示テンプレートを参照する設定候補です。",
+    detailDescription:
+      "Responses Createのprompt参照です。現在のDeveloper instructionsやDB source of truthとの役割を整理してから扱います。",
+    status: "needs-confirmation",
+    phase: "Future",
+    uiPlacement: "Responses > Prompt",
+    implementation: "not connected",
+    caution: "OpenAI側の保存済み設定へ依存するため、現在はAPIへ送りません。",
+  },
+  {
+    id: "responses-web-search-tool",
+    categoryId: "responses",
+    officialName: "web search tool",
+    japaneseName: "Web検索ツール",
+    shortDescription:
+      "AIがインターネット上の情報を検索するための追加機能です。",
+    detailDescription:
+      "Responses toolsのWeb searchです。参照表示、外部アクセス、保存方針を設計してから実装します。",
+    status: "planned",
+    phase: "Future tools phase",
+    uiPlacement: "Responses > Tools",
+    implementation: "not connected",
+    caution: "外部検索を勝手に実行しません。",
+  },
+  {
+    id: "responses-file-search-tool",
+    categoryId: "responses",
+    officialName: "file search tool",
+    japaneseName: "ファイル検索ツール",
+    shortDescription:
+      "登録済みファイルから関係する情報を探すための追加機能です。",
+    detailDescription:
+      "Responses toolsのFile searchです。Files、Vector Stores、権限、引用表示と合わせて設計します。",
+    status: "planned",
+    phase: "Future tools phase",
+    uiPlacement: "Responses > Tools",
+    implementation: "not connected",
+    caution: "ファイル・PDF・Vector Store実処理はまだ有効化しません。",
+  },
+  {
+    id: "responses-function-tool",
+    categoryId: "responses",
+    officialName: "function tool",
+    japaneseName: "関数ツール",
+    shortDescription:
+      "AIからアプリ内の決められた処理を呼び出すための追加機能です。",
+    detailDescription:
+      "Responses toolsのFunction callingです。許可一覧、入力検証、副作用確認、結果保存が必要です。",
+    status: "planned",
+    phase: "Future tools phase",
+    uiPlacement: "Responses > Tools",
+    implementation: "not connected",
+    caution: "任意処理や危険な操作を実行可能にしません。",
+  },
+  {
+    id: "responses-code-interpreter-tool",
+    categoryId: "responses",
+    officialName: "code interpreter / container tool",
+    japaneseName: "コード実行・コンテナツール",
+    shortDescription:
+      "隔離された環境でコードやファイル処理を実行する追加機能です。",
+    detailDescription:
+      "Responses toolsのCode InterpreterやContainer関連機能候補です。公式階層と4oSphereでの扱いは要確認です。",
+    status: "needs-confirmation",
+    phase: "Future tools phase",
+    uiPlacement: "Responses > Tools",
+    implementation: "not connected",
+    caution: "コード実行、ファイル処理、外部アクセスを有効化しません。",
+  },
+  {
+    id: "responses-top-logprobs",
+    categoryId: "responses",
+    officialName: "top_logprobs",
+    japaneseName: "候補確率の詳細",
+    shortDescription:
+      "各位置で選ばれやすかった単語候補と確率情報を追加取得する設定です。",
+    detailDescription:
+      "Responses Createのtop_logprobsです。通常チャット表示には不要な分析向け情報のため、現在は利用しません。",
+    status: "placeholder",
+    phase: "Future developer diagnostics",
+    uiPlacement: "Responses > Developer diagnostics",
+    implementation: "not connected",
+    caution: "表示量と保存量が増えるため、通常UIへ出しません。",
+  },
+  {
+    id: "responses-deprecated-user",
+    categoryId: "responses",
+    officialName: "user",
+    japaneseName: "旧ユーザー識別子",
+    shortDescription:
+      "以前使われていた、利用者を安定して識別するための設定です。",
+    detailDescription:
+      "Responses Createでdeprecatedのuserです。公式Referenceではsafety_identifierとprompt_cache_keyへの移行が案内されています。",
+    status: "legacy",
+    phase: "Deferred",
+    uiPlacement: "Responses > Legacy",
+    implementation: "not connected",
+    caution: "個人情報や内部user idをOpenAIへ送らず、この旧設定も使いません。",
+  },
+  {
+    id: "responses-mcp-tool",
+    categoryId: "responses",
+    officialName: "MCP tool",
+    japaneseName: "外部サービス連携ツール",
+    shortDescription: "外部サービスや専用ツールへ接続するための追加機能です。",
+    detailDescription:
+      "Responses toolsのMCP tool候補です。認証、許可、承認、外部送信範囲の設計が必要です。",
+    status: "needs-confirmation",
+    phase: "Future tools phase",
+    uiPlacement: "Responses > Tools",
+    implementation: "not connected",
+    caution: "外部サービスへの接続やデータ送信を有効化しません。",
+  },
+  {
+    id: "responses-computer-use-tool",
+    categoryId: "responses",
+    officialName: "computer use tool",
+    japaneseName: "画面操作ツール",
+    shortDescription: "AIが画面を見ながら操作するための追加機能です。",
+    detailDescription:
+      "Responses toolsのComputer use候補です。4o-only方針との対応可否も含めて要確認です。",
+    status: "unsupported",
+    phase: "Deferred",
+    uiPlacement: "Responses > Dangerous tools",
+    implementation: "not connected",
+    caution: "画面操作や外部操作を実行可能にしません。",
+  },
+  {
+    id: "responses-image-generation-tool",
+    categoryId: "responses",
+    officialName: "image generation tool",
+    japaneseName: "画像生成ツール",
+    shortDescription: "AIの応答中に画像を生成するための追加機能です。",
+    detailDescription:
+      "Responses toolsのImage generation候補です。画像保存・表示・モデル方針と合わせて後続検討します。",
+    status: "unsupported",
+    phase: "Future image phase",
+    uiPlacement: "Responses > Tools",
+    implementation: "not connected",
+    caution: "画像生成実処理や画像モデル追加は行いません。",
+  },
+  {
+    id: "responses-shell-apply-patch-tool",
+    categoryId: "responses",
+    officialName: "shell / apply_patch tools",
+    japaneseName: "コマンド・ファイル変更ツール",
+    shortDescription:
+      "コマンド実行やファイル変更を行う危険性の高い追加機能です。",
+    detailDescription:
+      "Responses toolsのShellやApply patch候補です。4oSphere通常チャットでは実行しません。",
+    status: "unsupported",
+    phase: "Deferred",
+    uiPlacement: "Responses > Dangerous tools",
+    implementation: "not connected",
+    caution: "シェル実行、ファイル変更、破壊的操作を有効化しません。",
   },
 
   {
@@ -1435,6 +1676,157 @@ const API_SETTING_SUBCATEGORY_DEFINITIONS = [
 ] as const satisfies readonly ApiSettingSubcategoryDefinition[];
 
 const subcategoryOrderByCategory = new Map<string, number>();
+const CATEGORY_CANONICAL_ORDER = [
+  "responses",
+  "common",
+  "conversations",
+  "chat-completions",
+  "realtime",
+  "audio",
+  "images",
+  "videos",
+  "embeddings",
+  "moderations",
+  "files",
+  "uploads",
+  "vector-stores",
+  "models",
+  "batches",
+  "fine-tuning",
+  "evals",
+  "graders",
+  "webhooks",
+  "containers",
+  "skills",
+  "chatkit",
+  "administration",
+  "legacy-apis",
+] as const;
+
+type FriendlyCopy = Pick<
+  ApiSettingSubcategory,
+  "effect" | "recommendation" | "whenToUse"
+>;
+
+const FRIENDLY_COPY_OVERRIDES: Partial<Record<string, FriendlyCopy>> = {
+  "common-api-key": {
+    effect:
+      "この鍵があることで、4oSphereのサーバーがOpenAI APIを呼び出せます。",
+    whenToUse: "画面からは触りません。管理者がサーバー環境変数で管理します。",
+    recommendation:
+      "ブラウザ、このタブ内の保存領域、端末への恒久保存、DBには保存しません。",
+  },
+  "responses-max-output-tokens": {
+    effect:
+      "小さくすると短くなり、長い説明は途中で切れることがあります。大きくすると長文を返せますが、時間やコストが増える場合があります。",
+    whenToUse: "返答を短くしたい、または長文を許可したいときだけ指定します。",
+    recommendation:
+      "通常は未設定のままAPIデフォルトに任せます。目安は短め512、標準1024、長め2048、最大寄り4096です。",
+  },
+  "responses-temperature": {
+    effect:
+      "低いほど安定しやすく、高いほど多様・意外な返答になりやすくなります。賢さそのものを上げる設定ではありません。",
+    whenToUse:
+      "回答がぶれすぎる、または創作や発想を広げたいときだけ指定します。",
+    recommendation:
+      "通常は未設定です。安定寄りは0.2〜0.5、標準寄りは0.7前後、創作寄りは1.0前後が目安です。top_pと同時に変えないでください。",
+  },
+  "responses-top-p": {
+    effect:
+      "小さくすると有力な単語候補へ絞り、大きくすると幅広い候補から選びます。temperatureと似た方向の調整です。",
+    whenToUse: "候補の選び方を細かく調整したいときだけ指定します。",
+    recommendation:
+      "通常は未設定です。基本はtemperatureかtop_pのどちらか一方だけを調整します。",
+  },
+  "responses-code-interpreter-tool": {
+    effect:
+      "4oSphereの通常チャット設定としては使いません。この画面から有効化・実行はできません。",
+    whenToUse:
+      "現Phaseでは触りません。安全な実行環境や許可設計を検討するときだけ確認します。",
+    recommendation:
+      "要確認のままにします。入力欄、toggle、実行ボタン、API接続は追加しません。",
+  },
+  "responses-mcp-tool": {
+    effect:
+      "外部サービスへ接続できる可能性がありますが、この画面から有効化・実行はできません。",
+    whenToUse:
+      "現Phaseでは触りません。認証、許可、送信範囲を安全に設計するときだけ確認します。",
+    recommendation:
+      "要確認のままにします。入力欄、toggle、実行ボタン、API接続は追加しません。",
+  },
+  "responses-computer-use-tool": {
+    effect:
+      "画面操作に関係する機能ですが、4oSphereでは使いません。この画面から有効化・実行はできません。",
+    whenToUse: "触りません。現Phaseでは棚卸しのみです。",
+    recommendation:
+      "非対応のままにします。入力欄、toggle、実行ボタン、API接続は追加しません。",
+  },
+  "responses-image-generation-tool": {
+    effect:
+      "画像生成に関係する機能ですが、4oSphereの通常チャットでは使いません。この画面から有効化・実行はできません。",
+    whenToUse: "触りません。現Phaseでは棚卸しのみです。",
+    recommendation:
+      "非対応のままにします。入力欄、toggle、実行ボタン、API接続は追加しません。",
+  },
+  "responses-shell-apply-patch-tool": {
+    effect:
+      "4oSphereの通常チャット設定としては使いません。この画面から有効化・実行はできません。",
+    whenToUse: "触りません。現Phaseでは棚卸しのみです。",
+    recommendation:
+      "非対応のままにします。実行UI、toggle、API接続は追加しません。",
+  },
+};
+
+function getDefaultFriendlyCopy(
+  status: ApiSettingSubcategoryStatus,
+): FriendlyCopy {
+  switch (status) {
+    case "implemented":
+      return {
+        effect: "現在の4oSphereの動作や生成内容に使われています。",
+        whenToUse: "現在の動作や設定内容を確認したいときに見ます。",
+        recommendation:
+          "変更できる画面がある場合だけ、目的が明確なときに調整してください。",
+      };
+    case "fixed":
+      return {
+        effect: "現在は安全な値またはサーバー側の設定に固定されています。",
+        whenToUse: "なぜ変更できないかを確認したいときに見ます。",
+        recommendation: "通常は触る必要がありません。",
+      };
+    case "admin":
+      return {
+        effect: "組織やサーバー全体へ影響する可能性があります。",
+        whenToUse: "管理者が運用方針を検討するときに確認します。",
+        recommendation: "通常ユーザーは触らず、管理者の判断に任せます。",
+      };
+    case "legacy":
+      return {
+        effect: "以前の方式との互換性に関係します。",
+        whenToUse: "古い実装との互換性を調べるときだけ確認します。",
+        recommendation: "新しく使い始める場合は現在のAPI機能を優先します。",
+      };
+    case "unsupported":
+      return {
+        effect: "4oSphereの現在の設計では利用しません。",
+        whenToUse: "非対応の理由を確認したいときに見ます。",
+        recommendation: "変更せず、現在対応している機能を使います。",
+      };
+    case "needs-confirmation":
+      return {
+        effect: "対応可否や安全な使い方がまだ確定していません。",
+        whenToUse: "将来の対応範囲を検討するときに確認します。",
+        recommendation: "公式仕様と安全性の確認が終わるまで変更しません。",
+      };
+    case "planned":
+    case "placeholder":
+      return {
+        effect: "現在は説明だけで、チャット生成の動作は変わりません。",
+        whenToUse: "今後追加される可能性のある設定を確認するときに見ます。",
+        recommendation: "実装されるまで触る必要はありません。",
+      };
+  }
+}
 
 export const API_SETTING_SUBCATEGORIES =
   API_SETTING_SUBCATEGORY_DEFINITIONS.map((subcategory) => {
@@ -1450,6 +1842,13 @@ export const API_SETTING_SUBCATEGORIES =
       canonicalResponsesIndex >= 0
         ? canonicalResponsesIndex + 1
         : nextCategoryOrder;
+    const categoryNumber =
+      CATEGORY_CANONICAL_ORDER.indexOf(
+        subcategory.categoryId as (typeof CATEGORY_CANONICAL_ORDER)[number],
+      ) + 1;
+    const friendlyCopy =
+      FRIENDLY_COPY_OVERRIDES[subcategory.id] ??
+      getDefaultFriendlyCopy(subcategory.status);
 
     subcategoryOrderByCategory.set(
       subcategory.categoryId,
@@ -1459,8 +1858,21 @@ export const API_SETTING_SUBCATEGORIES =
     return {
       ...subcategory,
       displayName: `${subcategory.officialName} / ${subcategory.japaneseName}`,
+      displayStatusLabel:
+        subcategory.id === "common-api-key"
+          ? "サーバー管理"
+          : API_SETTING_SUBCATEGORY_STATUS_LABELS[subcategory.status],
+      effect: friendlyCopy.effect,
+      nonTechnicalLabel: subcategory.japaneseName,
       officialPath: `API Reference > ${subcategory.uiPlacement} > ${subcategory.officialName}`,
       order,
+      categoryNumber,
+      recommendation: friendlyCopy.recommendation,
+      risk: subcategory.caution,
+      subcategoryNumber: order,
+      technicalLabel: subcategory.officialName,
+      what: subcategory.shortDescription,
+      whenToUse: friendlyCopy.whenToUse,
     };
   }) satisfies readonly ApiSettingSubcategory[];
 
