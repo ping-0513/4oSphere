@@ -51,7 +51,7 @@ export function ApiSettingCategoryCard({
             />
             <span className="min-w-0">
               <span className="block text-sm font-semibold leading-6 text-foreground">
-                {category.displayName}
+                {category.displayOrder}. {category.displayName}
               </span>
             </span>
           </span>
@@ -76,20 +76,25 @@ export function ApiSettingCategoryCard({
         </p>
         {!collapsed ? (
           <div className="mt-3 space-y-3 rounded-xl border border-border/70 bg-background/35 p-3 text-sm leading-6">
-            <p>{category.detailDescription}</p>
-            <dl className="grid gap-2 text-xs text-muted-foreground sm:grid-cols-[7rem_1fr]">
-              <dt className="font-medium text-foreground">officialPath</dt>
-              <dd>{category.officialPath}</dd>
-              <dt className="font-medium text-foreground">phase</dt>
-              <dd>{category.phase}</dd>
-              <dt className="font-medium text-foreground">notes</dt>
-              <dd>{category.notes}</dd>
-            </dl>
             {children ?? (
               <p className="rounded-xl border border-dashed border-border/80 px-3 py-2 text-xs text-muted-foreground">
                 このカテゴリの個別設定は後続フェーズで追加します。
               </p>
             )}
+            <details className="rounded-xl border border-border/70 bg-card/50 p-3 text-xs text-muted-foreground">
+              <summary className="cursor-pointer font-medium text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/50">
+                開発者向け詳細
+              </summary>
+              <p className="mt-3 leading-5">{category.detailDescription}</p>
+              <dl className="mt-3 grid gap-2 sm:grid-cols-[7rem_1fr]">
+                <dt className="font-medium text-foreground">officialPath</dt>
+                <dd>{category.officialPath}</dd>
+                <dt className="font-medium text-foreground">phase</dt>
+                <dd>{category.phase}</dd>
+                <dt className="font-medium text-foreground">notes</dt>
+                <dd>{category.notes}</dd>
+              </dl>
+            </details>
           </div>
         ) : null}
       </div>

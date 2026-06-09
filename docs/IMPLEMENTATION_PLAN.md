@@ -154,6 +154,9 @@ The Phase 4A settings shell adds the Settings > Model taxonomy:
   Every child setting candidate must keep an explicit Japanese label,
   bilingual display name, and metadata order. Search/filter operations must not
   reorder remaining items.
+- Display stable canonical parent/child numbers and short Japanese guidance so
+  non-technical Japanese speakers can distinguish editable, fixed,
+  display-only, server-managed, and unsupported items.
 
 The Phase 4B Responses settings detail connects a small, safe subset of the
 Responses API settings to the current non-streaming chat generation path:
@@ -166,8 +169,10 @@ Responses API settings to the current non-streaming chat generation path:
 - Normal send and regenerate pass the validated session settings to the server.
 - The server combines developer and custom instructions with explicit section
   labels into the Responses API `instructions` field.
-- `max_output_tokens`, `temperature`, and `top_p` are validated on the client
-  and server before any user message is saved.
+- `max_output_tokens`, `temperature`, and `top_p` are optional. They start
+  unset, show that the API default will be used, and are sent only after the
+  user explicitly enables and enters a value. Enabled values are validated on
+  the client and server before any user message is saved.
 - `store: false`, `stream: false`, `tools: []`, and `tool_choice: none` remain
   fixed.
 - The used settings are saved in `assistant_response_variants.settings_snapshot`

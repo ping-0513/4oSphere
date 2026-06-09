@@ -24,7 +24,6 @@ export const PHASE_3A_SETTINGS_SNAPSHOT = {
   store: false,
   tools: [],
   toolChoice: "none",
-  maxOutputTokens: DEFAULT_RESPONSE_SETTINGS.maxOutputTokens,
 } satisfies JsonValue;
 
 export class AssistantGenerationError extends Error {
@@ -54,14 +53,20 @@ export async function generateAssistantResponse(
     const response = await client.responses.create({
       input: toResponseInput(messages),
       instructions,
-      max_output_tokens: responseSettings.maxOutputTokens,
+      ...(responseSettings.maxOutputTokens === null
+        ? {}
+        : { max_output_tokens: responseSettings.maxOutputTokens }),
       model: apiModelId,
       store: false,
       stream: false,
-      temperature: responseSettings.temperature,
+      ...(responseSettings.temperature === null
+        ? {}
+        : { temperature: responseSettings.temperature }),
       tool_choice: "none",
       tools: [],
-      top_p: responseSettings.topP,
+      ...(responseSettings.topP === null
+        ? {}
+        : { top_p: responseSettings.topP }),
     });
     const contentRaw = response.output_text.trim();
 

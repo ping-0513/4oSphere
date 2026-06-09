@@ -24,32 +24,100 @@ const subcategoryStatusClassNames = {
 
 type ApiSettingPlaceholderSectionProps = {
   categoryDisplayName: string;
+  categoryDisplayOrder: number;
   subcategories: readonly ApiSettingSubcategory[];
 };
 
+function getFriendlyStatus(subcategory: ApiSettingSubcategory) {
+  if (subcategory.id === "common-api-key") {
+    return "サーバー管理";
+  }
+
+  return API_SETTING_SUBCATEGORY_STATUS_LABELS[subcategory.status];
+}
+
+function getFriendlyStatusClassName(subcategory: ApiSettingSubcategory) {
+  return subcategory.id === "common-api-key"
+    ? subcategoryStatusClassNames.admin
+    : subcategoryStatusClassNames[subcategory.status];
+}
+
+function getFriendlyGuidance(subcategory: ApiSettingSubcategory) {
+  switch (subcategory.status) {
+    case "implemented":
+      return {
+        effect: "現在の4oSphereの動作に使われています。",
+        recommendation:
+          "変更できる画面がある場合だけ、目的が明確なときに調整してください。",
+        when: "現在の動作や設定内容を確認したいときに見ます。",
+      };
+    case "fixed":
+      return {
+        effect: "現在は安全な値またはサーバー側の設定に固定されています。",
+        recommendation: "通常は触る必要がありません。",
+        when: "なぜ変更できないかを確認したいときに見ます。",
+      };
+    case "admin":
+      return {
+        effect: "組織やサーバー全体へ影響する可能性があります。",
+        recommendation: "通常ユーザーは触らず、管理者の判断に任せます。",
+        when: "管理者が運用方針を検討するときに確認します。",
+      };
+    case "legacy":
+      return {
+        effect: "以前の方式との互換性に関係します。",
+        recommendation: "新しく使い始める場合は現在のAPI機能を優先します。",
+        when: "古い実装との互換性を調べるときだけ確認します。",
+      };
+    case "unsupported":
+      return {
+        effect: "4oSphereの現在の設計とは両立しないため使いません。",
+        recommendation: "変更せず、代わりに現在対応している機能を使います。",
+        when: "非対応の理由を確認したいときに見ます。",
+      };
+    case "needs-confirmation":
+      return {
+        effect: "対応可否や安全な使い方がまだ確定していません。",
+        recommendation: "確認が終わるまで変更しません。",
+        when: "将来の対応範囲を検討するときに確認します。",
+      };
+    case "planned":
+    case "placeholder":
+      return {
+        effect: "現在は説明だけで、チャット生成の動作は変わりません。",
+        recommendation: "実装されるまで触る必要はありません。",
+        when: "今後追加される可能性のある設定を確認するときに見ます。",
+      };
+  }
+}
+
 function ApiSettingSubcategoryRow({
+  categoryDisplayOrder,
   subcategory,
 }: {
+  categoryDisplayOrder: number;
   subcategory: ApiSettingSubcategory;
 }) {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const detailsId = `${subcategory.id}-developer-details`;
+  const guidance = getFriendlyGuidance(subcategory);
 
   return (
-    <article className="rounded-xl border border-border/70 bg-card/60 p-3">
+    <article className="rounded-xl border border-dashed border-border/80 bg-card/45 p-3">
       <div className="flex items-start gap-2">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h4 className="text-sm font-semibold leading-6">
+              {categoryDisplayOrder}-{subcategory.order}.{" "}
               {subcategory.displayName}
             </h4>
             <span
               className={cn(
                 "rounded-full border px-2 py-1 text-[11px] font-medium leading-none",
-                subcategoryStatusClassNames[subcategory.status],
+                getFriendlyStatusClassName(subcategory),
               )}
             >
-              {API_SETTING_SUBCATEGORY_STATUS_LABELS[subcategory.status]}
+              {getFriendlyStatus(subcategory)}
             </span>
           </div>
         </div>
@@ -59,9 +127,26 @@ function ApiSettingSubcategoryRow({
           shortDescription={subcategory.shortDescription}
         />
       </div>
-      <p className="mt-2 text-sm leading-6 text-muted-foreground">
-        {subcategory.shortDescription}
-      </p>
+      <dl className="mt-2 grid gap-1 text-xs leading-5 text-muted-foreground">
+        <div>
+          <dt className="inline font-medium text-foreground">これは何？ </dt>
+          <dd className="inline">{subcategory.shortDescription}</dd>
+        </div>
+        <div>
+          <dt className="inline font-medium text-foreground">
+            変えるとどうなる？{" "}
+          </dt>
+          <dd className="inline">{guidance.effect}</dd>
+        </div>
+        <div>
+          <dt className="inline font-medium text-foreground">いつ触る？ </dt>
+          <dd className="inline">{guidance.when}</dd>
+        </div>
+        <div>
+          <dt className="inline font-medium text-foreground">おすすめ </dt>
+          <dd className="inline">{guidance.recommendation}</dd>
+        </div>
+      </dl>
       <Button
         aria-controls={detailsId}
         aria-expanded={detailsOpen}
@@ -104,6 +189,7 @@ function ApiSettingSubcategoryRow({
 
 export function ApiSettingPlaceholderSection({
   categoryDisplayName,
+  categoryDisplayOrder,
   subcategories,
 }: ApiSettingPlaceholderSectionProps) {
   if (!subcategories.length) {
@@ -118,17 +204,16 @@ export function ApiSettingPlaceholderSection({
     <section className="space-y-3">
       <div className="rounded-xl border border-dashed border-border/80 bg-card/45 p-3">
         <h3 className="text-sm font-semibold leading-6">
-          {categoryDisplayName} の子設定候補
+          {categoryDisplayOrder}. {categoryDisplayName} の設定項目
         </h3>
         <p className="mt-1 text-xs leading-5 text-muted-foreground">
-          ここにある項目はOpenAI
-          APIで触れる挙動の棚卸しです。実装済み以外はまだAPI
-          payloadへ反映せず、disabled / placeholder / plannedとして残します。
+          点線の項目は説明・棚卸し用です。入力欄ではなく、現在は画面から変更できません。
         </p>
       </div>
       <div className="grid gap-2">
         {subcategories.map((subcategory) => (
           <ApiSettingSubcategoryRow
+            categoryDisplayOrder={categoryDisplayOrder}
             key={subcategory.id}
             subcategory={subcategory}
           />

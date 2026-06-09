@@ -68,12 +68,12 @@ export const RESPONSES_SUBCATEGORY_CANONICAL_ORDER = [
 ] as const;
 
 export const API_SETTING_SUBCATEGORY_STATUS_LABELS = {
-  implemented: "実装済み",
+  implemented: "変更・利用できます",
   planned: "予定",
-  fixed: "固定表示",
-  placeholder: "placeholder",
+  fixed: "変更できません",
+  placeholder: "棚卸しのみ",
   "needs-confirmation": "要確認",
-  admin: "管理者向け",
+  admin: "サーバー管理",
   legacy: "Legacy",
   unsupported: "非対応",
 } satisfies Record<ApiSettingSubcategoryStatus, string>;
@@ -368,7 +368,7 @@ const API_SETTING_SUBCATEGORY_DEFINITIONS = [
     japaneseName: "最大出力トークン",
     shortDescription: "応答の最大出力量です。",
     detailDescription:
-      "Phase 4Bでは1〜4096の整数としてUIとserver actionで検証し、payloadとsettings_snapshotへ反映します。",
+      "未指定ならAPIデフォルトを使います。指定する場合は1〜4096の整数として画面とserver actionで検証し、APIへ送る設定とsettings_snapshotへ反映します。",
     status: "implemented",
     phase: "Phase 4B",
     uiPlacement: "Responses > Basic settings",
@@ -379,10 +379,11 @@ const API_SETTING_SUBCATEGORY_DEFINITIONS = [
     id: "responses-temperature",
     categoryId: "responses",
     officialName: "temperature",
-    japaneseName: "生成の揺らぎ",
-    shortDescription: "出力のランダム性を調整します。",
+    japaneseName: "温度サンプリング",
+    shortDescription:
+      "応答の候補選びの広がりです。低いほど安定し、高いほど多様になりやすくなります。",
     detailDescription:
-      "Phase 4Bでは0〜2の範囲で検証し、normal sendとregenerateに反映します。",
+      "未指定ならAPIデフォルトを使います。指定する場合は0〜2の範囲で検証し、normal sendとregenerateに反映します。",
     status: "implemented",
     phase: "Phase 4B",
     uiPlacement: "Responses > Basic settings",
@@ -396,7 +397,7 @@ const API_SETTING_SUBCATEGORY_DEFINITIONS = [
     japaneseName: "確率質量",
     shortDescription: "候補トークンの絞り込み幅です。",
     detailDescription:
-      "Phase 4Bでは0〜1の範囲で検証し、normal sendとregenerateに反映します。",
+      "未指定ならAPIデフォルトを使います。指定する場合は0〜1の範囲で検証し、normal sendとregenerateに反映します。",
     status: "implemented",
     phase: "Phase 4B",
     uiPlacement: "Responses > Basic settings",

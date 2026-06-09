@@ -30,23 +30,33 @@ type ResponsesSettingsSectionProps = {
 
 type TextareaSettingProps = {
   detail: string;
+  effect: string;
   error?: string;
+  guidance: string;
   id: string;
   label: string;
+  number: string;
   onChange: (value: string) => void;
   placeholder: string;
+  recommendation: string;
   shortDescription: string;
   value: string;
 };
 
 type NumberSettingProps = {
   detail: string;
+  enabled: boolean;
+  effect: string;
   error?: string;
+  guidance: string;
   id: string;
   label: string;
   max: number;
   min: number;
   onChange: (value: string) => void;
+  onEnabledChange: (enabled: boolean) => void;
+  number: string;
+  recommendation: string;
   shortDescription: string;
   step: number;
   value: string;
@@ -54,6 +64,41 @@ type NumberSettingProps = {
 
 function countCharacters(value: string) {
   return Array.from(value).length;
+}
+
+function SettingExplanation({
+  effect,
+  guidance,
+  recommendation,
+  shortDescription,
+}: {
+  effect: string;
+  guidance: string;
+  recommendation: string;
+  shortDescription: string;
+}) {
+  return (
+    <dl className="mt-2 grid gap-1 text-xs leading-5 text-muted-foreground">
+      <div>
+        <dt className="inline font-medium text-foreground">これは何？ </dt>
+        <dd className="inline">{shortDescription}</dd>
+      </div>
+      <div>
+        <dt className="inline font-medium text-foreground">
+          変えるとどうなる？{" "}
+        </dt>
+        <dd className="inline">{effect}</dd>
+      </div>
+      <div>
+        <dt className="inline font-medium text-foreground">いつ触る？ </dt>
+        <dd className="inline">{guidance}</dd>
+      </div>
+      <div>
+        <dt className="inline font-medium text-foreground">おすすめ </dt>
+        <dd className="inline">{recommendation}</dd>
+      </div>
+    </dl>
+  );
 }
 
 function SectionTitle({
@@ -79,11 +124,15 @@ function SectionTitle({
 
 function TextareaSetting({
   detail,
+  effect,
   error,
+  guidance,
   id,
   label,
+  number,
   onChange,
   placeholder,
+  recommendation,
   shortDescription,
   value,
 }: TextareaSettingProps) {
@@ -94,15 +143,23 @@ function TextareaSetting({
     <div className="rounded-xl border border-border/70 bg-card/60 p-3">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <label
-            className="text-sm font-medium leading-6 text-foreground"
-            htmlFor={id}
-          >
-            {label}
-          </label>
-          <p className="text-xs leading-5 text-muted-foreground">
-            {shortDescription}
-          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <label
+              className="text-sm font-medium leading-6 text-foreground"
+              htmlFor={id}
+            >
+              {number}. {label}
+            </label>
+            <span className="rounded-full border border-primary/35 bg-primary/10 px-2 py-1 text-[11px] font-medium leading-none text-primary">
+              変更できます
+            </span>
+          </div>
+          <SettingExplanation
+            effect={effect}
+            guidance={guidance}
+            recommendation={recommendation}
+            shortDescription={shortDescription}
+          />
         </div>
         <SettingsHelpPopover
           detailDescription={detail}
@@ -144,12 +201,18 @@ function TextareaSetting({
 
 function NumberSetting({
   detail,
+  enabled,
+  effect,
   error,
+  guidance,
   id,
   label,
   max,
   min,
   onChange,
+  onEnabledChange,
+  number,
+  recommendation,
   shortDescription,
   step,
   value,
@@ -160,15 +223,20 @@ function NumberSetting({
     <div className="rounded-xl border border-border/70 bg-card/60 p-3">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <label
-            className="text-sm font-medium leading-6 text-foreground"
-            htmlFor={id}
-          >
-            {label}
-          </label>
-          <p className="text-xs leading-5 text-muted-foreground">
-            {shortDescription}
-          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-sm font-medium leading-6 text-foreground">
+              {number}. {label}
+            </p>
+            <span className="rounded-full border border-primary/35 bg-primary/10 px-2 py-1 text-[11px] font-medium leading-none text-primary">
+              変更できます
+            </span>
+          </div>
+          <SettingExplanation
+            effect={effect}
+            guidance={guidance}
+            recommendation={recommendation}
+            shortDescription={shortDescription}
+          />
         </div>
         <SettingsHelpPopover
           detailDescription={detail}
@@ -176,10 +244,23 @@ function NumberSetting({
           shortDescription={shortDescription}
         />
       </div>
+      <label className="mt-3 flex items-center justify-between gap-3 rounded-lg border border-border/70 bg-background/60 px-3 py-2 text-sm">
+        <span>{label}を指定する</span>
+        <input
+          checked={enabled}
+          className="size-4 accent-primary"
+          onChange={(event) => onEnabledChange(event.target.checked)}
+          type="checkbox"
+        />
+      </label>
+      <p className="mt-2 text-xs font-medium text-primary">
+        現在: {enabled ? "指定した値を使う" : "APIデフォルトに任せる"}
+      </p>
       <input
         aria-describedby={statusId}
         aria-invalid={Boolean(error)}
         className="mt-2 h-10 w-full rounded-xl border border-input bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/40 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/30"
+        disabled={!enabled}
         id={id}
         max={max}
         min={min}
@@ -196,7 +277,10 @@ function NumberSetting({
         }
         id={statusId}
       >
-        {error ?? `範囲: ${min} - ${max.toLocaleString()}`}
+        {error ??
+          (enabled
+            ? `範囲: ${min} - ${max.toLocaleString()}`
+            : "値はAPIへ送りません。OpenAIの標準動作を使います。")}
       </p>
     </div>
   );
@@ -205,21 +289,53 @@ function NumberSetting({
 function FixedSettingRow({
   detail,
   label,
+  number,
   value,
 }: {
   detail: string;
   label: string;
+  number: string;
   value: string;
 }) {
   return (
     <div className="flex items-start justify-between gap-3 rounded-xl border border-border/70 bg-card/50 px-3 py-2">
       <div>
-        <p className="text-sm font-medium leading-6 text-foreground">{label}</p>
-        <p className="text-xs leading-5 text-muted-foreground">{detail}</p>
+        <p className="text-sm font-medium leading-6 text-foreground">
+          {number}. {label}
+        </p>
+        <dl className="mt-1 grid gap-1 text-xs leading-5 text-muted-foreground">
+          <div>
+            <dt className="inline font-medium text-foreground">これは何？ </dt>
+            <dd className="inline">{detail}</dd>
+          </div>
+          <div>
+            <dt className="inline font-medium text-foreground">
+              変えるとどうなる？{" "}
+            </dt>
+            <dd className="inline">
+              この行は現在の入力元や固定値を表示するため、ここでは変更できません。
+            </dd>
+          </div>
+          <div>
+            <dt className="inline font-medium text-foreground">いつ触る？ </dt>
+            <dd className="inline">
+              現在の動作を確認したいときだけ見てください。
+            </dd>
+          </div>
+          <div>
+            <dt className="inline font-medium text-foreground">おすすめ </dt>
+            <dd className="inline">通常はそのまま使ってください。</dd>
+          </div>
+        </dl>
       </div>
-      <span className="shrink-0 rounded-full border border-border/70 bg-background px-2 py-1 text-xs text-muted-foreground">
-        {value}
-      </span>
+      <div className="flex shrink-0 flex-col items-end gap-1">
+        <span className="rounded-full border border-border/70 bg-background px-2 py-1 text-xs text-muted-foreground">
+          {value}
+        </span>
+        <span className="text-[11px] text-muted-foreground">
+          ここでは変更不可
+        </span>
+      </div>
     </div>
   );
 }
@@ -248,13 +364,13 @@ function SaveActionBar({
             }
           >
             {saving
-              ? "適用中..."
+              ? "保存中..."
               : dirty
                 ? "未保存の変更があります"
-                : "適用済み（このタブ内）"}
+                : "保存済み（このタブ内）"}
           </p>
           <p className="text-xs leading-5 text-muted-foreground">
-            変更を適用すると次回送信・次回再生成から反映されます。
+            このタブ内の生成設定として保存します。アカウント全体への保存ではありません。次回送信・次回再生成から反映されます。
           </p>
         </div>
         <div className="flex min-w-0 flex-wrap gap-2 sm:justify-end">
@@ -285,7 +401,7 @@ function SaveActionBar({
             ) : (
               <Save aria-hidden="true" className="size-4" />
             )}
-            変更を適用
+            設定を保存
           </Button>
         </div>
       </div>
@@ -328,7 +444,7 @@ export function ResponsesSettingsSection({
           現在のチャット生成に反映される設定
         </h3>
         <p className="mt-1 text-xs leading-5 text-muted-foreground">
-          入力中の内容はdraftです。適用した設定だけが次回送信と次回再生成に反映されます。タイトル自動生成とvariant切り替えには反映されません。
+          入力中の内容はまだ未保存です。設定を保存した後、次回送信と次回再生成から使われます。タイトル自動生成と回答候補の切り替えには反映されません。
         </p>
       </div>
 
@@ -338,86 +454,133 @@ export function ResponsesSettingsSection({
         </SectionTitle>
         <TextareaSetting
           detail="Responses APIのinstructionsへ反映します。4oSphere側・開発者側がモデルに守らせたい基本方針です。通常メッセージ本文とは結合しません。"
+          effect="保存後の回答すべてに、ここで指定した基本方針が追加されます。"
           error={fieldErrors.developerInstructions}
+          guidance="このチャット全体でAIに必ず守らせたい方針があるときに使います。"
           id="response-developer-instructions"
           label="Developer instructions / 開発者指示"
+          number="1-1"
           onChange={(developerInstructions) =>
             update({ developerInstructions })
           }
           placeholder="このチャットでAIに守らせたい基本方針を入力"
-          shortDescription="API payload上はinstructionsに入る上位指示です。"
+          recommendation="必要な場合だけ入力し、通常の質問や依頼はチャット下部から送ってください。"
+          shortDescription="AIへ送る設定内容に含める、優先度の高い指示です。"
           value={draftSettings.developerInstructions}
         />
         <TextareaSetting
           detail="ユーザーがこのチャット生成に追加したい回答の好み、口調、前提条件などです。Phase 4BではDeveloper instructionsと区切ってinstructionsへ合成します。"
+          effect="保存後の回答に、口調や長さなどの好みが追加されます。"
           error={fieldErrors.customUserInstructions}
+          guidance="回答の長さ、口調、前提条件などを毎回指定したいときに使います。"
           id="response-custom-user-instructions"
           label="Custom user instructions / カスタム指示"
+          number="1-2"
           onChange={(customUserInstructions) =>
             update({ customUserInstructions })
           }
           placeholder="回答の好み、口調、前提条件などを入力"
+          recommendation="一時的な依頼なら通常メッセージを使い、継続したい好みだけを入力してください。"
           shortDescription="通常メッセージ本文とは別の任意指示です。"
           value={draftSettings.customUserInstructions}
         />
       </section>
 
       <section className="space-y-3">
-        <SectionTitle description="Responses APIに渡す入力の組み立てを表示します。">
+        <SectionTitle description="AIへ渡す会話内容が、どこから用意されるかを表示します。">
           入力構成
         </SectionTitle>
         <FixedSettingRow
-          detail="チャット下部の入力欄から送信されます。Settings panel内では編集しません。"
+          detail="チャット下部の入力欄から送信されます。この設定画面内では編集しません。"
           label="Current user message / 通常メッセージ"
-          value="composer"
+          number="1-3"
+          value="チャット下部"
         />
         <FixedSettingRow
-          detail="Supabaseに保存されたturn履歴から構築します。"
+          detail="保存済みの会話履歴から自動で用意されます。ここでは変更できません。"
           label="Conversation history / 会話履歴"
-          value="DB"
+          number="1-4"
+          value="自動"
         />
         <FixedSettingRow
-          detail="active variantのみが履歴に使われます。"
+          detail="現在選ばれている回答候補だけが会話履歴に使われます。"
           label="Assistant history / アシスタント履歴"
-          value="active only"
+          number="1-5"
+          value="選択中のみ"
         />
         <FixedSettingRow
-          detail="既存の4o-only snapshot selectorで選択したモデルを使います。"
+          detail="画面上部で選択した4oモデルを使います。"
           label="model / モデル"
+          number="1-6"
           value={selectedSnapshot}
         />
         <NumberSetting
           detail="Responses APIのmax_output_tokensに反映します。大きいほど長い応答を許容します。"
+          effect="小さくすると回答が短く切れやすくなり、大きくすると長い回答を許可します。"
+          enabled={draftSettings.specifyMaxOutputTokens}
           error={fieldErrors.maxOutputTokens}
+          guidance="回答が長すぎる、または長い回答を許可したいときだけ指定します。"
           id="response-max-output-tokens"
           label="max_output_tokens / 最大出力トークン"
           max={MAX_MAX_OUTPUT_TOKENS}
           min={MIN_MAX_OUTPUT_TOKENS}
           onChange={(maxOutputTokens) => update({ maxOutputTokens })}
+          onEnabledChange={(specifyMaxOutputTokens) =>
+            update({
+              maxOutputTokens: specifyMaxOutputTokens
+                ? draftSettings.maxOutputTokens
+                : "",
+              specifyMaxOutputTokens,
+            })
+          }
+          number="1-7"
+          recommendation="通常はOFFのままAPIデフォルトに任せます。指定すると長さと料金に影響します。"
           shortDescription="応答で生成できる最大トークン数です。"
           step={1}
           value={draftSettings.maxOutputTokens}
         />
         <NumberSetting
           detail="Responses APIのtemperatureに反映します。高いほど揺らぎが増えます。top_pと同時に大きく動かすと挙動が読みづらくなります。"
+          effect="低いほど安定しやすく、高いほど多様・意外な返答になりやすくなります。"
+          enabled={draftSettings.specifyTemperature}
           error={fieldErrors.temperature}
+          guidance="回答が毎回ぶれすぎる、または創作的に広げたいときだけ指定します。"
           id="response-temperature"
-          label="temperature / 生成の揺らぎ"
+          label="temperature / 温度サンプリング"
           max={MAX_TEMPERATURE}
           min={MIN_TEMPERATURE}
           onChange={(temperature) => update({ temperature })}
-          shortDescription="出力のランダム性を調整します。"
+          onEnabledChange={(specifyTemperature) =>
+            update({
+              specifyTemperature,
+              temperature: specifyTemperature ? draftSettings.temperature : "",
+            })
+          }
+          number="1-8"
+          recommendation="通常はOFFのままAPIデフォルトに任せます。top_pと同時に変えないでください。"
+          shortDescription="応答の候補選びの広がりです。低いほど安定し、高いほど多様になりやすくなります。"
           step={0.1}
           value={draftSettings.temperature}
         />
         <NumberSetting
           detail="Responses APIのtop_pに反映します。候補トークンの確率質量を制限します。temperatureと同時に大きく動かす場合は注意してください。"
+          effect="小さくすると有力な候補に絞り、大きくすると幅広い候補から選びます。"
+          enabled={draftSettings.specifyTopP}
           error={fieldErrors.topP}
+          guidance="候補の選び方を細かく調整したい場合だけ指定します。"
           id="response-top-p"
           label="top_p / 確率質量"
           max={MAX_TOP_P}
           min={MIN_TOP_P}
           onChange={(topP) => update({ topP })}
+          onEnabledChange={(specifyTopP) =>
+            update({
+              specifyTopP,
+              topP: specifyTopP ? draftSettings.topP : "",
+            })
+          }
+          number="1-9"
+          recommendation="通常はOFFのままAPIデフォルトに任せます。temperatureと同時に変えないでください。"
           shortDescription="候補の絞り込み幅を調整します。"
           step={0.05}
           value={draftSettings.topP}
@@ -429,24 +592,28 @@ export function ResponsesSettingsSection({
           保存・実行方式
         </SectionTitle>
         <FixedSettingRow
-          detail="OpenAI側には保存せず、Supabase DBを会話のsource of truthにします。"
+          detail="OpenAI側には会話を保存せず、4oSphere側で管理します。"
           label="store / OpenAI側保存"
-          value="false"
+          number="1-10"
+          value="false固定"
         />
         <FixedSettingRow
-          detail="Phase 4Bではnon-streamingのみです。"
+          detail="現在は回答が完成してからまとめて表示されます。少しずつ表示する方式には変更できません。"
           label="stream / ストリーミング"
-          value="false"
+          number="1-11"
+          value="false固定"
         />
         <FixedSettingRow
-          detail="web/file/function toolsはまだ使いません。"
+          detail="検索・ファイル参照・関数実行などの追加機能は、まだ使いません。"
           label="tools / ツール"
-          value="[]"
+          number="1-12"
+          value="なし"
         />
         <FixedSettingRow
-          detail="toolsが空のため、tool_choiceはnone固定です。"
+          detail="追加機能を使わないため、ツール選択も「使わない」に固定されています。"
           label="tool_choice / ツール選択"
-          value="none"
+          number="1-13"
+          value="使わない"
         />
       </section>
     </div>

@@ -242,8 +242,8 @@ export function ModelSettingsPanel({
                 設定 &gt; モデル
               </Dialog.Title>
               <Dialog.Description className="mt-1 text-sm leading-6 text-muted-foreground">
-                これはOpenAI API設定の親カテゴリ一覧です。個別パラメータとAPI
-                payload反映は後続フェーズで追加します。
+                OpenAI
+                APIで調整できる内容を、日本語の説明付きで整理しています。変更できない項目は説明・棚卸し用です。
               </Dialog.Description>
             </div>
             <Dialog.Close asChild>
@@ -266,7 +266,7 @@ export function ModelSettingsPanel({
                     選択中モデル
                   </h2>
                   <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                    ChatHeader、Composer、Regenerateと同じ一時stateを使います。保存はしません。
+                    チャット上部、メッセージ送信、回答の再生成で同じモデルを使います。アカウント全体には保存しません。
                   </p>
                   <ModelSnapshotSelect
                     buttonClassName="mt-3 w-full"
@@ -274,6 +274,29 @@ export function ModelSettingsPanel({
                     onSelectedSnapshotChange={handleSelectedSnapshotChange}
                     selectedSnapshot={selectedSnapshot}
                   />
+                </section>
+                <section className="rounded-2xl border border-border/70 bg-card/70 p-3">
+                  <h2 className="text-sm font-semibold leading-6">見分け方</h2>
+                  <div className="mt-2 grid gap-2 text-xs leading-6 text-muted-foreground">
+                    <p>
+                      <span className="mr-2 rounded-full border border-primary/35 bg-primary/10 px-2 py-1 text-primary">
+                        変更できます
+                      </span>
+                      入力欄や切り替えがあります。
+                    </p>
+                    <p>
+                      <span className="mr-2 rounded-full border border-border bg-background px-2 py-1">
+                        変更できません
+                      </span>
+                      現在の固定動作を説明します。
+                    </p>
+                    <p>
+                      <span className="mr-2 rounded-full border border-dashed border-border px-2 py-1">
+                        説明・棚卸し用
+                      </span>
+                      点線の項目はまだ画面から使えません。
+                    </p>
+                  </div>
                 </section>
                 <section className="rounded-2xl border border-border/70 bg-card/70 p-3">
                   <h2 className="flex items-center gap-2 text-sm font-semibold leading-6">
@@ -304,7 +327,7 @@ export function ModelSettingsPanel({
                     className="mt-3 block text-xs font-medium text-muted-foreground"
                     htmlFor="settings-category-status"
                   >
-                    status
+                    状態
                   </label>
                   <select
                     className="mt-1 h-10 w-full rounded-xl border border-input bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/40"
@@ -321,7 +344,7 @@ export function ModelSettingsPanel({
                     ))}
                   </select>
                   <p className="mt-3 text-xs leading-5 text-muted-foreground">
-                    metadataは24カテゴリすべてを保持します。検索とfilterは表示だけを絞ります。
+                    24カテゴリの順番は変わりません。検索と状態の絞り込みは、表示する項目だけを減らします。
                   </p>
                 </section>
               </aside>
@@ -368,6 +391,7 @@ export function ModelSettingsPanel({
                             />
                             <ApiSettingPlaceholderSection
                               categoryDisplayName={category.displayName}
+                              categoryDisplayOrder={category.displayOrder}
                               subcategories={subcategories.filter(
                                 (subcategory) => subcategory.order >= 14,
                               )}
@@ -376,6 +400,7 @@ export function ModelSettingsPanel({
                         ) : (
                           <ApiSettingPlaceholderSection
                             categoryDisplayName={category.displayName}
+                            categoryDisplayOrder={category.displayOrder}
                             subcategories={subcategories}
                           />
                         )}

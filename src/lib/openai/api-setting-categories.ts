@@ -155,12 +155,12 @@ const API_SETTING_CATEGORY_JAPANESE_METADATA = {
 >;
 
 export const API_SETTING_STATUS_LABELS = {
-  implemented: "一部実装済み",
-  planned: "実装予定",
-  admin: "管理者向け",
-  legacy: "旧API",
-  "needs-confirmation": "要確認",
-  unsupported: "非対応",
+  implemented: "一部使えます",
+  planned: "後続予定",
+  admin: "管理者・サーバー向け",
+  legacy: "旧方式",
+  "needs-confirmation": "対応要確認",
+  unsupported: "画面からは使えません",
 } satisfies Record<ApiSettingCategoryStatus, string>;
 
 const API_SETTING_CATEGORY_DEFINITIONS = [

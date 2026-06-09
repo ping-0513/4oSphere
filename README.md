@@ -118,7 +118,9 @@ Parent categories use the canonical display order defined in
 `API_SETTING_CATEGORY_CANONICAL_ORDER`, beginning with Responses and then
 Common. Child setting rows carry `officialName`, `japaneseName`, `displayName`,
 and `order`; search and status filters only remove non-matching rows and do not
-reorder the remaining metadata.
+reorder the remaining metadata. The panel displays stable parent/child numbers,
+Japanese explanations, and visually separates editable settings, fixed values,
+display-only inventory rows, and server-managed settings.
 
 The Responses category now includes session-only detail controls for the current
 non-streaming chat generation path. Developer instructions and custom user
@@ -127,6 +129,9 @@ composer body. For normal send and regenerate, the server validates these values
 and combines them with explicit section labels into the Responses API
 `instructions` field. Edits stay as draft values until the user applies them;
 only applied session settings are used by the next normal send or regenerate.
+Optional numeric settings (`max_output_tokens`, `temperature`, and `top_p`)
+start unset. The UI sends them only after the user explicitly enables and enters
+a valid value; otherwise the OpenAI API default is used.
 Applied settings are restored within the same browser tab through
 `sessionStorage`; they are not account or database settings. The settings used
 for a generated response are written to

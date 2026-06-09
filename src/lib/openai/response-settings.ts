@@ -14,13 +14,13 @@ export const RESPONSE_SETTINGS_SESSION_STORAGE_KEY =
 export type ResponseSettings = {
   customUserInstructions: string;
   developerInstructions: string;
-  maxOutputTokens: number;
+  maxOutputTokens: number | null;
   store: false;
   stream: false;
-  temperature: number;
+  temperature: number | null;
   toolChoice: "none";
   tools: [];
-  topP: number;
+  topP: number | null;
 };
 
 export type ResponseSettingsBySnapshot = Record<
@@ -32,6 +32,9 @@ export type ResponseSettingsDraft = {
   customUserInstructions: string;
   developerInstructions: string;
   maxOutputTokens: string;
+  specifyMaxOutputTokens: boolean;
+  specifyTemperature: boolean;
+  specifyTopP: boolean;
   store: false;
   stream: false;
   temperature: string;
@@ -63,13 +66,13 @@ export type ResponseSettingsFieldErrors = Partial<
 export const DEFAULT_RESPONSE_SETTINGS = {
   customUserInstructions: "",
   developerInstructions: "",
-  maxOutputTokens: MAX_MAX_OUTPUT_TOKENS,
+  maxOutputTokens: null,
   store: false,
   stream: false,
-  temperature: 1,
+  temperature: null,
   toolChoice: "none",
   tools: [],
-  topP: 1,
+  topP: null,
 } satisfies ResponseSettings;
 
 export type ResponseSettingsValidationResult =
@@ -128,13 +131,18 @@ export function createResponseSettingsDraft(
   return {
     customUserInstructions: settings.customUserInstructions,
     developerInstructions: settings.developerInstructions,
-    maxOutputTokens: String(settings.maxOutputTokens),
+    maxOutputTokens:
+      settings.maxOutputTokens === null ? "" : String(settings.maxOutputTokens),
+    specifyMaxOutputTokens: settings.maxOutputTokens !== null,
+    specifyTemperature: settings.temperature !== null,
+    specifyTopP: settings.topP !== null,
     store: false,
     stream: false,
-    temperature: String(settings.temperature),
+    temperature:
+      settings.temperature === null ? "" : String(settings.temperature),
     toolChoice: "none",
     tools: [],
-    topP: String(settings.topP),
+    topP: settings.topP === null ? "" : String(settings.topP),
   };
 }
 
@@ -169,6 +177,12 @@ function readNumber(value: unknown) {
   return Number.NaN;
 }
 
+function readOptionalNumber(value: unknown) {
+  return value === undefined || value === null || value === ""
+    ? null
+    : readNumber(value);
+}
+
 function validateInstructions(value: string, label: string) {
   if (countCharacters(value) > MAX_RESPONSE_INSTRUCTIONS_CHARACTERS) {
     return `${label}は${MAX_RESPONSE_INSTRUCTIONS_CHARACTERS.toLocaleString()}文字以内で入力してください。`;
@@ -200,23 +214,28 @@ function buildDraftFieldErrors(draft: ResponseSettingsDraft) {
   }
 
   if (
-    !Number.isInteger(maxOutputTokens) ||
-    maxOutputTokens < MIN_MAX_OUTPUT_TOKENS ||
-    maxOutputTokens > MAX_MAX_OUTPUT_TOKENS
+    draft.specifyMaxOutputTokens &&
+    (!Number.isInteger(maxOutputTokens) ||
+      maxOutputTokens < MIN_MAX_OUTPUT_TOKENS ||
+      maxOutputTokens > MAX_MAX_OUTPUT_TOKENS)
   ) {
     fieldErrors.maxOutputTokens = `最大出力トークンは${MIN_MAX_OUTPUT_TOKENS}から${MAX_MAX_OUTPUT_TOKENS.toLocaleString()}の整数で指定してください。`;
   }
 
   if (
-    !Number.isFinite(temperature) ||
-    temperature < MIN_TEMPERATURE ||
-    temperature > MAX_TEMPERATURE
+    draft.specifyTemperature &&
+    (!Number.isFinite(temperature) ||
+      temperature < MIN_TEMPERATURE ||
+      temperature > MAX_TEMPERATURE)
   ) {
-    fieldErrors.temperature = `temperatureは${MIN_TEMPERATURE}から${MAX_TEMPERATURE}の範囲で指定してください。`;
+    fieldErrors.temperature = `温度サンプリングは${MIN_TEMPERATURE}から${MAX_TEMPERATURE}の範囲で指定してください。`;
   }
 
-  if (!Number.isFinite(topP) || topP < MIN_TOP_P || topP > MAX_TOP_P) {
-    fieldErrors.topP = `top_pは${MIN_TOP_P}から${MAX_TOP_P}の範囲で指定してください。`;
+  if (
+    draft.specifyTopP &&
+    (!Number.isFinite(topP) || topP < MIN_TOP_P || topP > MAX_TOP_P)
+  ) {
+    fieldErrors.topP = `確率質量は${MIN_TOP_P}から${MAX_TOP_P}の範囲で指定してください。`;
   }
 
   if (draft.store !== false) {
@@ -254,13 +273,15 @@ export function validateResponseSettingsDraft(
     settings: {
       customUserInstructions: draft.customUserInstructions,
       developerInstructions: draft.developerInstructions,
-      maxOutputTokens: Number(draft.maxOutputTokens),
+      maxOutputTokens: draft.specifyMaxOutputTokens
+        ? Number(draft.maxOutputTokens)
+        : null,
       store: false,
       stream: false,
-      temperature: Number(draft.temperature),
+      temperature: draft.specifyTemperature ? Number(draft.temperature) : null,
       toolChoice: "none",
       tools: [],
-      topP: Number(draft.topP),
+      topP: draft.specifyTopP ? Number(draft.topP) : null,
     },
   };
 }
@@ -324,12 +345,13 @@ export function validateResponseSettings(
     return { error: customUserInstructionsError, settings: null };
   }
 
-  const maxOutputTokens = readNumber(record.maxOutputTokens);
+  const maxOutputTokens = readOptionalNumber(record.maxOutputTokens);
 
   if (
-    !Number.isInteger(maxOutputTokens) ||
-    maxOutputTokens < MIN_MAX_OUTPUT_TOKENS ||
-    maxOutputTokens > MAX_MAX_OUTPUT_TOKENS
+    maxOutputTokens !== null &&
+    (!Number.isInteger(maxOutputTokens) ||
+      maxOutputTokens < MIN_MAX_OUTPUT_TOKENS ||
+      maxOutputTokens > MAX_MAX_OUTPUT_TOKENS)
   ) {
     return {
       error: `最大出力トークンは${MIN_MAX_OUTPUT_TOKENS}から${MAX_MAX_OUTPUT_TOKENS.toLocaleString()}の整数で指定してください。`,
@@ -337,24 +359,28 @@ export function validateResponseSettings(
     };
   }
 
-  const temperature = readNumber(record.temperature);
+  const temperature = readOptionalNumber(record.temperature);
 
   if (
-    !Number.isFinite(temperature) ||
-    temperature < MIN_TEMPERATURE ||
-    temperature > MAX_TEMPERATURE
+    temperature !== null &&
+    (!Number.isFinite(temperature) ||
+      temperature < MIN_TEMPERATURE ||
+      temperature > MAX_TEMPERATURE)
   ) {
     return {
-      error: `temperatureは${MIN_TEMPERATURE}から${MAX_TEMPERATURE}の範囲で指定してください。`,
+      error: `温度サンプリングは${MIN_TEMPERATURE}から${MAX_TEMPERATURE}の範囲で指定してください。`,
       settings: null,
     };
   }
 
-  const topP = readNumber(record.topP);
+  const topP = readOptionalNumber(record.topP);
 
-  if (!Number.isFinite(topP) || topP < MIN_TOP_P || topP > MAX_TOP_P) {
+  if (
+    topP !== null &&
+    (!Number.isFinite(topP) || topP < MIN_TOP_P || topP > MAX_TOP_P)
+  ) {
     return {
-      error: `top_pは${MIN_TOP_P}から${MAX_TOP_P}の範囲で指定してください。`,
+      error: `確率質量は${MIN_TOP_P}から${MAX_TOP_P}の範囲で指定してください。`,
       settings: null,
     };
   }
@@ -495,14 +521,18 @@ export function createResponseSettingsSnapshot(
     customUserInstructions: settings.customUserInstructions,
     developerInstructions: settings.developerInstructions,
     instructionsComposition: "developer_plus_custom_user",
-    maxOutputTokens: settings.maxOutputTokens,
+    ...(settings.maxOutputTokens === null
+      ? {}
+      : { maxOutputTokens: settings.maxOutputTokens }),
     schemaVersion: 2,
     settingsProfile: "session-ui",
     store: false,
     stream: false,
-    temperature: settings.temperature,
+    ...(settings.temperature === null
+      ? {}
+      : { temperature: settings.temperature }),
     toolChoice: "none",
     tools: [],
-    topP: settings.topP,
+    ...(settings.topP === null ? {} : { topP: settings.topP }),
   };
 }

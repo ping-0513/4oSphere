@@ -249,6 +249,9 @@ The normal parent-category order starts with Responses, then Common, followed by
 the remaining canonical API taxonomy. Parent and child rows must show both an
 official-like English name and Japanese label, and filtering must preserve their
 metadata-defined relative order.
+The settings panel must also show stable canonical parent/child numbers and
+plain Japanese guidance for what each setting does, when to use it, and whether
+it is editable, fixed, display-only, server-managed, or unsupported.
 
 Responses settings are added incrementally. Developer instructions and custom
 user instructions must remain separate from the normal composer message in UI,
@@ -260,6 +263,10 @@ normal send and regenerate should use only explicitly applied session settings.
 Session-only Responses settings may be restored within the current browser tab
 with `sessionStorage`, but should not be written to localStorage or a database
 settings table until a dedicated persistence design is added.
+Optional numeric Responses settings should start unset and clearly show that
+the OpenAI API default will be used. They must be omitted from the API request
+and settings snapshot until the user explicitly enables and supplies a valid
+value.
 
 ## 13. Metadata display
 
