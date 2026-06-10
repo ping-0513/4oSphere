@@ -48,6 +48,10 @@ function getInventoryRowClassName(subcategory: ApiSettingSubcategory) {
   return "border-border/80 bg-card/45";
 }
 
+function isDisplayOnly(subcategory: ApiSettingSubcategory) {
+  return subcategory.status !== "implemented" && subcategory.status !== "fixed";
+}
+
 function ApiSettingSubcategoryRow({
   subcategory,
 }: {
@@ -106,6 +110,11 @@ function ApiSettingSubcategoryRow({
           <dd className="inline">{subcategory.recommendation}</dd>
         </div>
       </dl>
+      {isDisplayOnly(subcategory) ? (
+        <p className="mt-2 rounded-lg border border-current/15 bg-background/40 px-2 py-1 text-[11px] font-medium text-muted-foreground">
+          説明のみ・この画面から操作できません
+        </p>
+      ) : null}
       <Button
         aria-controls={detailsId}
         aria-expanded={detailsOpen}

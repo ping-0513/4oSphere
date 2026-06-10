@@ -283,6 +283,9 @@ status, security, file, evaluation, and administration concepts. Operation-like
 rows such as create, update, delete, cancel, pause, resume, publish, and
 administration actions are documentation only in Settings and must explicitly
 state that they cannot be enabled or executed there.
+Display-only inventory rows must also carry a persistent visual notice that
+they cannot be operated from Settings; help and developer-detail controls must
+not resemble API execution actions.
 
 ## 13. Metadata display
 

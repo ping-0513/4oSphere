@@ -160,6 +160,9 @@ Fine-tuning, Evals, Graders, Webhooks, Containers, Skills, ChatKit,
 Administration, Legacy APIs, and Chat Completions. Create, update, delete,
 cancel, pause, resume, file, and administrator operations remain descriptive
 rows only and cannot be executed from Settings.
+The lower-category inventory is split into category-range metadata modules and
+re-exported through one aggregate module. This keeps the UI import stable while
+making the large display-only inventory reviewable.
 
 ## Verification
 

@@ -1,0 +1,235 @@
+import {
+  inventory,
+  type LowerCategoryInventorySeed,
+} from "@/lib/openai/api-setting-inventory-shared";
+
+export const API_SETTING_INVENTORY_10_14_SEEDS = [
+  ...inventory("moderations", "Moderations > Results", "placeholder", [
+    ["model", "model", "判定モデル", "安全性判定に使うモデルです。"],
+    [
+      "categories",
+      "categories",
+      "判定カテゴリ",
+      "どの種類の安全性リスクに当てはまるかを示します。",
+    ],
+    [
+      "category-scores",
+      "category_scores",
+      "カテゴリ別スコア",
+      "安全性カテゴリごとの判定の強さを示します。",
+    ],
+    [
+      "flagged",
+      "flagged",
+      "要注意判定",
+      "入力や出力が要注意と判定されたかを示します。",
+    ],
+    [
+      "multimodal-input",
+      "multimodal input",
+      "画像を含む安全性判定",
+      "テキスト以外も含めて安全性を確認する候補です。",
+    ],
+  ]),
+  ...inventory("files", "Files > Inventory", "placeholder", [
+    [
+      "list",
+      "List files",
+      "ファイル一覧",
+      "OpenAI側に置かれたファイルの一覧を確認するAPI操作です。",
+    ],
+    [
+      "retrieve",
+      "Retrieve file",
+      "ファイル情報取得",
+      "特定ファイルの名前や用途などを確認するAPI操作です。",
+    ],
+    [
+      "content",
+      "Retrieve file content",
+      "ファイル内容取得",
+      "特定ファイルの内容を取得するAPI操作です。",
+    ],
+    [
+      "delete",
+      "Delete file",
+      "ファイル削除",
+      "OpenAI側のファイルを削除する破壊的なAPI操作です。",
+    ],
+    [
+      "status",
+      "file status",
+      "ファイル状態",
+      "アップロードや処理の進行状態を示します。",
+    ],
+    [
+      "expires-after",
+      "expires_after",
+      "ファイル有効期限",
+      "ファイルをいつまで保持するかに関係する設定です。",
+    ],
+    [
+      "bytes",
+      "bytes",
+      "ファイルサイズ",
+      "ファイルの大きさをバイト単位で示します。",
+    ],
+    [
+      "filename",
+      "filename",
+      "ファイル名",
+      "アップロードされたファイルの名前です。",
+    ],
+  ]),
+  ...inventory("uploads", "Uploads > Inventory", "placeholder", [
+    [
+      "create",
+      "Create upload",
+      "大容量アップロード開始",
+      "分割アップロードを開始するAPI操作です。",
+    ],
+    [
+      "metadata",
+      "upload metadata",
+      "アップロード情報",
+      "ファイル名や用途などの補助情報です。",
+    ],
+    [
+      "mime-type",
+      "mime_type",
+      "ファイル形式",
+      "アップロードするデータの種類を示します。",
+    ],
+    ["size", "bytes", "合計サイズ", "分割して送るデータ全体の大きさです。"],
+    [
+      "status",
+      "upload status",
+      "アップロード状態",
+      "分割アップロードの進行状態を示します。",
+    ],
+    [
+      "expires-at",
+      "expires_at",
+      "アップロード有効期限",
+      "分割アップロードを完了できる期限です。",
+    ],
+  ]),
+  ...inventory("vector-stores", "Vector Stores > Inventory", "placeholder", [
+    [
+      "list",
+      "List vector stores",
+      "ベクトルストア一覧",
+      "検索用データ置き場の一覧を確認するAPI操作です。",
+    ],
+    [
+      "retrieve",
+      "Retrieve vector store",
+      "ベクトルストア情報取得",
+      "検索用データ置き場の状態を確認するAPI操作です。",
+    ],
+    [
+      "update",
+      "Update vector store",
+      "ベクトルストア更新",
+      "検索用データ置き場の設定を変更するAPI操作です。",
+    ],
+    [
+      "delete",
+      "Delete vector store",
+      "ベクトルストア削除",
+      "検索用データ置き場を削除する破壊的なAPI操作です。",
+    ],
+    [
+      "search",
+      "Search vector store",
+      "ベクトル検索",
+      "保存した文書から関連情報を探すAPI操作です。",
+    ],
+    [
+      "files",
+      "Vector store files",
+      "登録ファイル",
+      "検索用データ置き場に登録されたファイルです。",
+    ],
+    [
+      "retrieve-file",
+      "Retrieve vector store file",
+      "登録ファイル情報取得",
+      "登録済みファイルの状態を確認するAPI操作です。",
+    ],
+    [
+      "delete-file",
+      "Delete vector store file",
+      "登録ファイル削除",
+      "検索対象からファイルを外す破壊的なAPI操作です。",
+    ],
+    [
+      "file-content",
+      "Retrieve vector store file content",
+      "解析済み内容取得",
+      "検索用に解析されたファイル内容を確認するAPI操作です。",
+    ],
+    [
+      "status",
+      "vector store status",
+      "処理状態",
+      "検索できる状態まで準備できたかを示します。",
+    ],
+    [
+      "expires-after",
+      "expires_after",
+      "有効期限",
+      "検索用データ置き場を保持する期間です。",
+    ],
+    [
+      "usage-bytes",
+      "usage_bytes",
+      "使用容量",
+      "検索用データ置き場が使う容量です。",
+    ],
+    [
+      "filters",
+      "attribute filters",
+      "検索絞り込み",
+      "補助情報を使って検索対象を絞る設定です。",
+    ],
+    [
+      "ranking-options",
+      "ranking_options",
+      "検索順位調整",
+      "検索結果の並び方や採用基準を調整する設定です。",
+    ],
+  ]),
+  ...inventory("models", "Models > Inventory", "needs-confirmation", [
+    [
+      "owned-by",
+      "owned_by",
+      "所有者情報",
+      "モデルを提供・所有する主体を示す情報です。",
+    ],
+    [
+      "created",
+      "created",
+      "作成日時",
+      "モデルが作成された日時を示す情報です。",
+    ],
+    [
+      "capabilities",
+      "model capabilities",
+      "対応機能",
+      "モデルが扱える入力や機能を示す候補情報です。",
+    ],
+    [
+      "access",
+      "model access",
+      "モデル利用権限",
+      "組織やプロジェクトでモデルを使えるかに関係します。",
+    ],
+    [
+      "delete",
+      "Delete fine-tuned model",
+      "学習済みモデル削除",
+      "学習済みモデルを削除する破壊的なAPI操作です。",
+    ],
+  ]),
+] satisfies readonly LowerCategoryInventorySeed[];

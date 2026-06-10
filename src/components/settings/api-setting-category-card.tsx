@@ -14,7 +14,7 @@ const statusClassNames = {
   implemented: "border-emerald-400/35 bg-emerald-400/10 text-emerald-300",
   planned: "border-zinc-400/30 bg-zinc-400/10 text-zinc-300",
   admin: "border-red-400/35 bg-red-400/10 text-red-300",
-  legacy: "border-zinc-400/30 bg-zinc-400/10 text-zinc-200",
+  legacy: "border-amber-400/35 bg-amber-400/10 text-amber-200",
   "needs-confirmation": "border-violet-400/35 bg-violet-400/10 text-violet-200",
   unsupported: "border-destructive/35 bg-destructive/10 text-destructive",
 } satisfies Record<ApiSettingCategory["status"], string>;

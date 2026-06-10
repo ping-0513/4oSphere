@@ -203,6 +203,9 @@ Responses API settings to the current non-streaming chat generation path:
   status, file, evaluation, webhook, container, skill, ChatKit,
   administration, and legacy-operation inventory. These rows must expose no
   input, toggle, execution action, persistence, or API connection.
+- Keep the large display-only inventory split into category-range metadata
+  modules behind a single aggregate export. Refactoring these files must
+  preserve IDs, array order, numbering, Japanese guidance, and statuses.
 
 ## Phase 5: message actions and metadata
 
