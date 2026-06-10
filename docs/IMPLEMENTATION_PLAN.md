@@ -182,6 +182,12 @@ Responses API settings to the current non-streaming chat generation path:
 - Applied settings may be restored within the current browser tab through
   `sessionStorage`; this must store only Responses settings, never API keys or
   provider secrets.
+- Show a plain-Japanese applied-settings summary for the next normal send and
+  regenerate. Separate values that will be sent from optional values omitted
+  in favor of API defaults, and keep deferred Responses inventory visibly
+  display-only.
+- The summary must show only setting state, never instruction text, user
+  messages, conversation history, API keys, headers, or raw provider output.
 - Closing the settings panel with unsaved draft changes should require explicit
   confirmation before those draft changes are discarded.
 - Title generation keeps its fixed `gpt-4o-2024-11-20` behavior and does not

@@ -1,6 +1,6 @@
 "use client";
 
-import { LoaderCircle, Save, Undo2 } from "lucide-react";
+import { LoaderCircle, RotateCcw, Save, Undo2 } from "lucide-react";
 
 import { SettingsHelpPopover } from "@/components/settings/settings-help-popover";
 import { Button } from "@/components/ui/button";
@@ -419,6 +419,14 @@ export function ResponsesSettingsSection({
   saveStatus,
   selectedSnapshot,
 }: ResponsesSettingsSectionProps) {
+  const optionalNumbersUseApiDefaults =
+    !draftSettings.specifyMaxOutputTokens &&
+    !draftSettings.specifyTemperature &&
+    !draftSettings.specifyTopP &&
+    !draftSettings.maxOutputTokens &&
+    !draftSettings.temperature &&
+    !draftSettings.topP;
+
   function update(next: Partial<ResponseSettingsDraft>) {
     onDraftSettingsChange({
       ...draftSettings,
@@ -427,6 +435,17 @@ export function ResponsesSettingsSection({
       stream: false,
       toolChoice: "none",
       tools: [],
+    });
+  }
+
+  function resetOptionalNumbersToApiDefaults() {
+    update({
+      maxOutputTokens: "",
+      specifyMaxOutputTokens: false,
+      specifyTemperature: false,
+      specifyTopP: false,
+      temperature: "",
+      topP: "",
     });
   }
 
@@ -452,6 +471,22 @@ export function ResponsesSettingsSection({
         <SectionTitle description="ここで編集して保存した内容だけが、次回の送信と再生成で使われます。">
           現在保存される設定
         </SectionTitle>
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/70 bg-background/45 px-3 py-2">
+          <p className="text-xs leading-5 text-muted-foreground">
+            任意の数値設定だけを未指定へ戻します。開発者指示とカスタム指示は消しません。設定を保存するまで次回送信には反映されません。
+          </p>
+          <Button
+            className="h-9 rounded-xl"
+            disabled={optionalNumbersUseApiDefaults}
+            onClick={resetOptionalNumbersToApiDefaults}
+            size="sm"
+            type="button"
+            variant="outline"
+          >
+            <RotateCcw aria-hidden="true" className="size-4" />
+            APIデフォルトへ戻す
+          </Button>
+        </div>
         <TextareaSetting
           detail="Responses APIのinstructionsへ反映します。4oSphere側・開発者側がモデルに守らせたい基本方針です。通常メッセージ本文とは結合しません。"
           effect="保存後の回答すべてに、ここで指定した基本方針が追加されます。"

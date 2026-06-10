@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ApiSettingPlaceholderSection } from "@/components/settings/api-setting-placeholder-section";
 import { ApiSettingCategoryCard } from "@/components/settings/api-setting-category-card";
 import { ModelSnapshotSelect } from "@/components/settings/model-snapshot-select";
+import { ResponseSettingsEffectivePreview } from "@/components/settings/response-settings-effective-preview";
 import { ResponsesSettingsSection } from "@/components/settings/responses-settings-section";
 import { Button } from "@/components/ui/button";
 import {
@@ -374,6 +375,19 @@ export function ModelSettingsPanel({
                     const subcategories = getApiSettingSubcategories(
                       category.id,
                     );
+                    const unusedResponseSubcategories =
+                      category.id === "responses"
+                        ? subcategories.filter((subcategory) =>
+                            [
+                              "admin",
+                              "legacy",
+                              "needs-confirmation",
+                              "placeholder",
+                              "planned",
+                              "unsupported",
+                            ].includes(subcategory.status),
+                          )
+                        : [];
 
                     return (
                       <ApiSettingCategoryCard
@@ -400,6 +414,12 @@ export function ModelSettingsPanel({
                               onSave={handleResponseSettingsSave}
                               saveStatus={responseSettingsStatus}
                               selectedSnapshot={selectedSnapshot}
+                            />
+                            <ResponseSettingsEffectivePreview
+                              appliedSettings={selectedAppliedResponseSettings}
+                              dirty={responseSettingsDirty}
+                              selectedSnapshot={selectedSnapshot}
+                              unusedSubcategories={unusedResponseSubcategories}
                             />
                             <ApiSettingPlaceholderSection
                               categoryDisplayName={category.displayName}

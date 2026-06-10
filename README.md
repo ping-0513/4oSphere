@@ -143,6 +143,14 @@ connected to the current non-streaming chat path remain visible as fixed,
 planned, placeholder, unsupported, needs-confirmation, admin, or legacy rows and
 are not sent to the OpenAI API.
 
+The Responses settings section shows a Japanese summary of the applied settings
+that will be used by the next normal send or regenerate. It separates values
+that will be sent from optional values left to the OpenAI API default, and
+lists deferred Responses inventory behind a collapsed display-only section.
+The summary never displays API keys, instruction contents, user-message
+contents, or conversation-history contents. Resetting optional numeric settings
+changes only the draft until the user saves it.
+
 The settings inventory also provides plain-Japanese guidance for every child
 row: what it is, what changes, when to use it, a recommendation, and a risk
 note. Stable canonical numbers remain visible after search and filtering.

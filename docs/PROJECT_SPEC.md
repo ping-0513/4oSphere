@@ -267,6 +267,11 @@ Optional numeric Responses settings should start unset and clearly show that
 the OpenAI API default will be used. They must be omitted from the API request
 and settings snapshot until the user explicitly enables and supplies a valid
 value.
+The Responses settings UI must summarize the applied settings used by the next
+normal send or regenerate, separately identify optional settings omitted in
+favor of API defaults, and distinguish unsaved draft changes. This summary must
+not display API keys, instruction contents, user-message contents, conversation
+history contents, headers, or raw provider responses.
 Every settings child row should provide concise Japanese guidance for what the
 item is, what changing it would do, when it is appropriate, the recommended
 default posture, and important risks. Normal UI copy should avoid unexplained
