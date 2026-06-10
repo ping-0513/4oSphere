@@ -157,6 +157,9 @@ The Phase 4A settings shell adds the Settings > Model taxonomy:
 - Display stable canonical parent/child numbers and short Japanese guidance so
   non-technical Japanese speakers can distinguish editable, fixed,
   display-only, server-managed, and unsupported items.
+- Search and status filters inspect parent and child metadata, show child match
+  counts, and mark matching child rows without changing canonical order. Keep a
+  combined reset action available while filtering and in the zero-result state.
 
 The Phase 4B Responses settings detail connects a small, safe subset of the
 Responses API settings to the current non-streaming chat generation path:

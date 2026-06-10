@@ -23,6 +23,8 @@ type ApiSettingPlaceholderSectionProps = {
   categoryDisplayName: string;
   categoryDisplayOrder: number;
   heading?: string;
+  matchedSubcategoryIds?: ReadonlySet<string>;
+  searchOrFilterActive?: boolean;
   subcategories: readonly ApiSettingSubcategory[];
 };
 
@@ -53,8 +55,10 @@ function isDisplayOnly(subcategory: ApiSettingSubcategory) {
 }
 
 function ApiSettingSubcategoryRow({
+  matched,
   subcategory,
 }: {
+  matched: boolean;
   subcategory: ApiSettingSubcategory;
 }) {
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -67,10 +71,10 @@ function ApiSettingSubcategoryRow({
         getInventoryRowClassName(subcategory),
       )}
     >
-      <div className="flex items-start gap-2">
+      <div className="flex min-w-0 items-start gap-2">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h4 className="text-sm font-semibold leading-6">
+            <h4 className="break-words text-sm font-semibold leading-6 [overflow-wrap:anywhere]">
               {subcategory.categoryNumber}-{subcategory.subcategoryNumber}.{" "}
               {subcategory.displayName}
             </h4>
@@ -82,6 +86,11 @@ function ApiSettingSubcategoryRow({
             >
               {subcategory.displayStatusLabel}
             </span>
+            {matched ? (
+              <span className="rounded-full border border-primary/30 bg-primary/10 px-2 py-1 text-[11px] font-medium leading-none text-primary">
+                検索一致
+              </span>
+            ) : null}
           </div>
         </div>
         <SettingsHelpPopover
@@ -139,19 +148,33 @@ function ApiSettingSubcategoryRow({
           id={detailsId}
         >
           <dt className="font-medium text-foreground">表示名</dt>
-          <dd>{subcategory.displayName}</dd>
+          <dd className="break-words [overflow-wrap:anywhere]">
+            {subcategory.displayName}
+          </dd>
           <dt className="font-medium text-foreground">officialPath</dt>
-          <dd>{subcategory.officialPath}</dd>
+          <dd className="break-words [overflow-wrap:anywhere]">
+            {subcategory.officialPath}
+          </dd>
           <dt className="font-medium text-foreground">4oSphereでの扱い</dt>
-          <dd>{subcategory.implementation}</dd>
+          <dd className="break-words [overflow-wrap:anywhere]">
+            {subcategory.implementation}
+          </dd>
           <dt className="font-medium text-foreground">UI配置案</dt>
-          <dd>{subcategory.uiPlacement}</dd>
+          <dd className="break-words [overflow-wrap:anywhere]">
+            {subcategory.uiPlacement}
+          </dd>
           <dt className="font-medium text-foreground">phase</dt>
-          <dd>{subcategory.phase}</dd>
+          <dd className="break-words [overflow-wrap:anywhere]">
+            {subcategory.phase}
+          </dd>
           <dt className="font-medium text-foreground">notes</dt>
-          <dd>{subcategory.notes}</dd>
+          <dd className="break-words [overflow-wrap:anywhere]">
+            {subcategory.notes}
+          </dd>
           <dt className="font-medium text-foreground">注意点</dt>
-          <dd>{subcategory.risk}</dd>
+          <dd className="break-words [overflow-wrap:anywhere]">
+            {subcategory.risk}
+          </dd>
         </dl>
       ) : null}
     </article>
@@ -162,6 +185,8 @@ export function ApiSettingPlaceholderSection({
   categoryDisplayName,
   categoryDisplayOrder,
   heading,
+  matchedSubcategoryIds,
+  searchOrFilterActive = false,
   subcategories,
 }: ApiSettingPlaceholderSectionProps) {
   if (!subcategories.length) {
@@ -187,6 +212,10 @@ export function ApiSettingPlaceholderSection({
         {subcategories.map((subcategory) => (
           <ApiSettingSubcategoryRow
             key={subcategory.id}
+            matched={
+              searchOrFilterActive &&
+              Boolean(matchedSubcategoryIds?.has(subcategory.id))
+            }
             subcategory={subcategory}
           />
         ))}

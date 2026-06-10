@@ -154,6 +154,10 @@ changes only the draft until the user saves it.
 The settings inventory also provides plain-Japanese guidance for every child
 row: what it is, what changes, when to use it, a recommendation, and a risk
 note. Stable canonical numbers remain visible after search and filtering.
+Search and status filtering inspect both parent categories and child-setting
+metadata. Matching categories show the child match count, and expanded rows
+mark matching child settings without reordering the canonical inventory. Active
+search/filter conditions can be cleared together from the results UI.
 Editable, fixed/server-managed, inventory-only, needs-confirmation, and
 administrator-facing rows use distinct status labels and colors. The Responses
 inventory includes display-only coverage for additional Create Response fields

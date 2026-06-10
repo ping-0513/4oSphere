@@ -1,7 +1,7 @@
 "use client";
 
 import * as Dialog from "@radix-ui/react-dialog";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import { RotateCcw, Search, SlidersHorizontal, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { ApiSettingPlaceholderSection } from "@/components/settings/api-setting-placeholder-section";
@@ -13,9 +13,15 @@ import { Button } from "@/components/ui/button";
 import {
   API_SETTING_CATEGORIES,
   API_SETTING_STATUS_LABELS,
+  type ApiSettingCategory,
   type ApiSettingCategoryStatus,
 } from "@/lib/openai/api-setting-categories";
-import { getApiSettingSubcategories } from "@/lib/openai/api-setting-subcategories";
+import {
+  API_SETTING_SUBCATEGORY_STATUS_LABELS,
+  getApiSettingSubcategories,
+  type ApiSettingSubcategory,
+  type ApiSettingSubcategoryStatus,
+} from "@/lib/openai/api-setting-subcategories";
 import {
   createResponseSettingsDraft,
   createResponseSettingsDraftBySnapshot,
@@ -32,13 +38,26 @@ const STATUS_FILTERS = [
   "all",
   "implemented",
   "planned",
+  "fixed",
+  "placeholder",
   "admin",
   "legacy",
   "needs-confirmation",
   "unsupported",
-] as const satisfies readonly ("all" | ApiSettingCategoryStatus)[];
+] as const satisfies readonly (
+  | "all"
+  | ApiSettingCategoryStatus
+  | ApiSettingSubcategoryStatus
+)[];
 
 type StatusFilter = (typeof STATUS_FILTERS)[number];
+
+type CategorySearchResult = {
+  category: ApiSettingCategory;
+  matchedSubcategoryIds: ReadonlySet<string>;
+  matchingSubcategoryCount: number;
+  subcategories: readonly ApiSettingSubcategory[];
+};
 
 type ModelSettingsPanelProps = {
   onOpenChange: (open: boolean) => void;
@@ -53,7 +72,61 @@ type ModelSettingsPanelProps = {
 };
 
 function getStatusFilterLabel(status: StatusFilter) {
-  return status === "all" ? "すべて" : API_SETTING_STATUS_LABELS[status];
+  if (status === "all") {
+    return "すべて";
+  }
+
+  if (status === "fixed" || status === "placeholder") {
+    return API_SETTING_SUBCATEGORY_STATUS_LABELS[status];
+  }
+
+  return API_SETTING_STATUS_LABELS[status];
+}
+
+function normalizeSearchText(parts: readonly (number | string)[]) {
+  return parts.join(" ").toLocaleLowerCase("ja");
+}
+
+function getCategorySearchText(category: ApiSettingCategory) {
+  return normalizeSearchText([
+    category.displayOrder,
+    category.officialName,
+    category.japaneseName,
+    category.displayName,
+    category.shortDescription,
+    category.detailDescription,
+    category.status,
+    API_SETTING_STATUS_LABELS[category.status],
+    category.officialPath,
+    category.phase,
+    category.notes,
+  ]);
+}
+
+function getSubcategorySearchText(subcategory: ApiSettingSubcategory) {
+  return normalizeSearchText([
+    `${subcategory.categoryNumber}-${subcategory.subcategoryNumber}`,
+    subcategory.officialName,
+    subcategory.japaneseName,
+    subcategory.displayName,
+    subcategory.shortDescription,
+    subcategory.detailDescription,
+    subcategory.what,
+    subcategory.effect,
+    subcategory.whenToUse,
+    subcategory.recommendation,
+    subcategory.risk,
+    subcategory.status,
+    subcategory.displayStatusLabel,
+    subcategory.technicalLabel,
+    subcategory.nonTechnicalLabel,
+    subcategory.officialPath,
+    subcategory.phase,
+    subcategory.notes,
+    subcategory.uiPlacement,
+    subcategory.implementation,
+    subcategory.caution,
+  ]);
 }
 
 function loadCollapsedState() {
@@ -139,38 +212,62 @@ export function ModelSettingsPanel({
     );
   }, [collapsedById, collapseStateLoaded, open]);
 
-  const visibleCategories = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
+  const normalizedQuery = query.trim().toLocaleLowerCase("ja");
+  const searchOrFilterActive =
+    Boolean(normalizedQuery) || statusFilter !== "all";
+  const visibleCategoryResults = useMemo(() => {
+    return API_SETTING_CATEGORIES.flatMap((category) => {
+      const subcategories = getApiSettingSubcategories(category.id);
 
-    return API_SETTING_CATEGORIES.filter((category) => {
-      const matchesStatus =
+      if (!searchOrFilterActive) {
+        return [
+          {
+            category,
+            matchedSubcategoryIds: new Set<string>(),
+            matchingSubcategoryCount: 0,
+            subcategories,
+          } satisfies CategorySearchResult,
+        ];
+      }
+
+      const categoryMatchesQuery =
+        !normalizedQuery ||
+        getCategorySearchText(category).includes(normalizedQuery);
+      const categoryMatchesStatus =
         statusFilter === "all" || category.status === statusFilter;
-      const searchableText = [
-        category.officialName,
-        category.japaneseName,
-        category.shortDescription,
-        category.detailDescription,
-        category.officialPath,
-        category.notes,
-        ...getApiSettingSubcategories(category.id).flatMap((subcategory) => [
-          subcategory.officialName,
-          subcategory.japaneseName,
-          subcategory.shortDescription,
-          subcategory.detailDescription,
-          subcategory.uiPlacement,
-          subcategory.implementation,
-          subcategory.caution,
-        ]),
-      ]
-        .join(" ")
-        .toLowerCase();
+      const matchedSubcategories = subcategories.filter((subcategory) => {
+        const matchesQuery =
+          !normalizedQuery ||
+          getSubcategorySearchText(subcategory).includes(normalizedQuery);
+        const matchesStatus =
+          statusFilter === "all" || subcategory.status === statusFilter;
 
-      return (
-        matchesStatus &&
-        (!normalizedQuery || searchableText.includes(normalizedQuery))
-      );
+        return matchesQuery && matchesStatus;
+      });
+
+      if (
+        !(categoryMatchesQuery && categoryMatchesStatus) &&
+        !matchedSubcategories.length
+      ) {
+        return [];
+      }
+
+      return [
+        {
+          category,
+          matchedSubcategoryIds: new Set(
+            matchedSubcategories.map((subcategory) => subcategory.id),
+          ),
+          matchingSubcategoryCount: matchedSubcategories.length,
+          subcategories,
+        } satisfies CategorySearchResult,
+      ];
     });
-  }, [query, statusFilter]);
+  }, [normalizedQuery, searchOrFilterActive, statusFilter]);
+  const matchingSubcategoryCount = visibleCategoryResults.reduce(
+    (total, result) => total + result.matchingSubcategoryCount,
+    0,
+  );
 
   function handlePanelOpenChange(nextOpen: boolean) {
     if (!nextOpen && hasAnyUnsavedResponseSettings) {
@@ -190,6 +287,11 @@ export function ModelSettingsPanel({
     setResponseSettingsErrors({});
     setResponseSettingsStatus("idle");
     onSelectedSnapshotChange(snapshot);
+  }
+
+  function handleClearFilters() {
+    setQuery("");
+    setStatusFilter("all");
   }
 
   function handleResponseSettingsDraftChange(
@@ -331,7 +433,7 @@ export function ModelSettingsPanel({
                       className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
                       id="settings-category-search"
                       onChange={(event) => setQuery(event.target.value)}
-                      placeholder="カテゴリを検索"
+                      placeholder="カテゴリ・子設定を検索"
                       type="search"
                       value={query}
                     />
@@ -359,6 +461,23 @@ export function ModelSettingsPanel({
                   <p className="mt-3 text-xs leading-5 text-muted-foreground">
                     24カテゴリの順番は変わりません。検索と状態の絞り込みは、表示する項目だけを減らします。
                   </p>
+                  {searchOrFilterActive ? (
+                    <div className="mt-2 space-y-2 rounded-lg border border-primary/25 bg-primary/5 px-2 py-2">
+                      <p className="text-xs leading-5 text-muted-foreground">
+                        検索・フィルタ中です。親カテゴリと子設定の日本語・英語・説明・開発者向け詳細を対象にしています。番号と元の順番は維持します。
+                      </p>
+                      <Button
+                        className="h-9 w-full rounded-lg"
+                        onClick={handleClearFilters}
+                        size="sm"
+                        type="button"
+                        variant="outline"
+                      >
+                        <RotateCcw aria-hidden="true" className="size-4" />
+                        検索・フィルタを解除
+                      </Button>
+                    </div>
+                  ) : null}
                 </section>
               </aside>
               <section className="min-w-0">
@@ -366,84 +485,123 @@ export function ModelSettingsPanel({
                   <h2 className="text-sm font-semibold leading-6">
                     APIカテゴリ
                   </h2>
-                  <p className="text-xs text-muted-foreground">
-                    {visibleCategories.length} / {API_SETTING_CATEGORIES.length}
-                  </p>
+                  <div
+                    aria-live="polite"
+                    className="text-right text-xs text-muted-foreground"
+                  >
+                    <p>
+                      {visibleCategoryResults.length} /{" "}
+                      {API_SETTING_CATEGORIES.length} カテゴリ
+                    </p>
+                    {searchOrFilterActive ? (
+                      <p>子設定 {matchingSubcategoryCount}件一致</p>
+                    ) : null}
+                  </div>
                 </div>
                 <div className="space-y-3">
-                  {visibleCategories.map((category) => {
-                    const subcategories = getApiSettingSubcategories(
-                      category.id,
-                    );
-                    const unusedResponseSubcategories =
-                      category.id === "responses"
-                        ? subcategories.filter((subcategory) =>
-                            [
-                              "admin",
-                              "legacy",
-                              "needs-confirmation",
-                              "placeholder",
-                              "planned",
-                              "unsupported",
-                            ].includes(subcategory.status),
-                          )
-                        : [];
+                  {visibleCategoryResults.map(
+                    ({
+                      category,
+                      matchedSubcategoryIds,
+                      matchingSubcategoryCount: categoryMatchCount,
+                      subcategories,
+                    }) => {
+                      const unusedResponseSubcategories =
+                        category.id === "responses"
+                          ? subcategories.filter((subcategory) =>
+                              [
+                                "admin",
+                                "legacy",
+                                "needs-confirmation",
+                                "placeholder",
+                                "planned",
+                                "unsupported",
+                              ].includes(subcategory.status),
+                            )
+                          : [];
 
-                    return (
-                      <ApiSettingCategoryCard
-                        category={category}
-                        collapsed={collapsedById[category.id] ?? true}
-                        key={category.id}
-                        onToggle={() =>
-                          setCollapsedById((current) => ({
-                            ...current,
-                            [category.id]: !(current[category.id] ?? true),
-                          }))
-                        }
-                      >
-                        {category.id === "responses" ? (
-                          <>
-                            <ResponsesSettingsSection
-                              dirty={responseSettingsDirty}
-                              draftSettings={selectedDraftResponseSettings}
-                              fieldErrors={responseSettingsErrors}
-                              onDiscard={handleResponseSettingsDiscard}
-                              onDraftSettingsChange={
-                                handleResponseSettingsDraftChange
-                              }
-                              onSave={handleResponseSettingsSave}
-                              saveStatus={responseSettingsStatus}
-                              selectedSnapshot={selectedSnapshot}
-                            />
-                            <ResponseSettingsEffectivePreview
-                              appliedSettings={selectedAppliedResponseSettings}
-                              dirty={responseSettingsDirty}
-                              selectedSnapshot={selectedSnapshot}
-                              unusedSubcategories={unusedResponseSubcategories}
-                            />
+                      return (
+                        <ApiSettingCategoryCard
+                          category={category}
+                          collapsed={collapsedById[category.id] ?? true}
+                          key={category.id}
+                          matchingSubcategoryCount={categoryMatchCount}
+                          onToggle={() =>
+                            setCollapsedById((current) => ({
+                              ...current,
+                              [category.id]: !(current[category.id] ?? true),
+                            }))
+                          }
+                          searchOrFilterActive={searchOrFilterActive}
+                        >
+                          {category.id === "responses" ? (
+                            <>
+                              <ResponsesSettingsSection
+                                dirty={responseSettingsDirty}
+                                draftSettings={selectedDraftResponseSettings}
+                                fieldErrors={responseSettingsErrors}
+                                matchedSubcategoryIds={matchedSubcategoryIds}
+                                onDiscard={handleResponseSettingsDiscard}
+                                onDraftSettingsChange={
+                                  handleResponseSettingsDraftChange
+                                }
+                                onSave={handleResponseSettingsSave}
+                                saveStatus={responseSettingsStatus}
+                                selectedSnapshot={selectedSnapshot}
+                              />
+                              <ResponseSettingsEffectivePreview
+                                appliedSettings={
+                                  selectedAppliedResponseSettings
+                                }
+                                dirty={responseSettingsDirty}
+                                selectedSnapshot={selectedSnapshot}
+                                unusedSubcategories={
+                                  unusedResponseSubcategories
+                                }
+                              />
+                              <ApiSettingPlaceholderSection
+                                categoryDisplayName={category.displayName}
+                                categoryDisplayOrder={category.displayOrder}
+                                heading="後続で追加する項目"
+                                matchedSubcategoryIds={matchedSubcategoryIds}
+                                searchOrFilterActive={searchOrFilterActive}
+                                subcategories={subcategories.filter(
+                                  (subcategory) => subcategory.order >= 14,
+                                )}
+                              />
+                            </>
+                          ) : (
                             <ApiSettingPlaceholderSection
                               categoryDisplayName={category.displayName}
                               categoryDisplayOrder={category.displayOrder}
-                              heading="後続で追加する項目"
-                              subcategories={subcategories.filter(
-                                (subcategory) => subcategory.order >= 14,
-                              )}
+                              matchedSubcategoryIds={matchedSubcategoryIds}
+                              searchOrFilterActive={searchOrFilterActive}
+                              subcategories={subcategories}
                             />
-                          </>
-                        ) : (
-                          <ApiSettingPlaceholderSection
-                            categoryDisplayName={category.displayName}
-                            categoryDisplayOrder={category.displayOrder}
-                            subcategories={subcategories}
-                          />
-                        )}
-                      </ApiSettingCategoryCard>
-                    );
-                  })}
-                  {!visibleCategories.length ? (
-                    <p className="rounded-2xl border border-border/70 bg-card/70 p-4 text-sm text-muted-foreground">
-                      条件に一致するカテゴリはありません。
-                    </p>
+                          )}
+                        </ApiSettingCategoryCard>
+                      );
+                    },
+                  )}
+                  {!visibleCategoryResults.length ? (
+                    <div className="rounded-2xl border border-border/70 bg-card/70 p-4">
+                      <p className="text-sm font-medium text-foreground">
+                        該当する設定項目がありません。
+                      </p>
+                      <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                        検索語を短くするか、状態フィルタを「すべて」に戻してください。
+                      </p>
+                      <Button
+                        className="mt-3 h-9 rounded-lg"
+                        onClick={handleClearFilters}
+                        size="sm"
+                        type="button"
+                        variant="outline"
+                      >
+                        <RotateCcw aria-hidden="true" className="size-4" />
+                        検索・フィルタを解除
+                      </Button>
+                    </div>
                   ) : null}
                 </div>
               </section>

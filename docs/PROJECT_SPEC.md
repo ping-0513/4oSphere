@@ -249,6 +249,10 @@ The normal parent-category order starts with Responses, then Common, followed by
 the remaining canonical API taxonomy. Parent and child rows must show both an
 official-like English name and Japanese label, and filtering must preserve their
 metadata-defined relative order.
+Search and status filtering must apply to both parent categories and child
+settings. Results should show child match counts and identify matching child
+rows while preserving canonical numbers and relative order. Active conditions
+must have a clear reset action, including from the zero-result state.
 The settings panel must also show stable canonical parent/child numbers and
 plain Japanese guidance for what each setting does, when to use it, and whether
 it is editable, fixed, display-only, server-managed, or unsupported.

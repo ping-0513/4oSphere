@@ -21,6 +21,7 @@ type ResponsesSettingsSectionProps = {
   dirty: boolean;
   draftSettings: ResponseSettingsDraft;
   fieldErrors: ResponseSettingsFieldErrors;
+  matchedSubcategoryIds?: ReadonlySet<string>;
   onDiscard: () => void;
   onDraftSettingsChange: (settings: ResponseSettingsDraft) => void;
   onSave: () => void;
@@ -35,6 +36,7 @@ type TextareaSettingProps = {
   guidance: string;
   id: string;
   label: string;
+  matched?: boolean;
   number: string;
   onChange: (value: string) => void;
   placeholder: string;
@@ -51,6 +53,7 @@ type NumberSettingProps = {
   guidance: string;
   id: string;
   label: string;
+  matched?: boolean;
   max: number;
   min: number;
   onChange: (value: string) => void;
@@ -129,6 +132,7 @@ function TextareaSetting({
   guidance,
   id,
   label,
+  matched = false,
   number,
   onChange,
   placeholder,
@@ -141,8 +145,8 @@ function TextareaSetting({
 
   return (
     <div className="rounded-xl border border-border/70 bg-card/60 p-3">
-      <div className="flex items-start justify-between gap-2">
-        <div>
+      <div className="flex min-w-0 items-start justify-between gap-2">
+        <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <label
               className="text-sm font-medium leading-6 text-foreground"
@@ -153,6 +157,11 @@ function TextareaSetting({
             <span className="rounded-full border border-emerald-400/35 bg-emerald-400/10 px-2 py-1 text-[11px] font-medium leading-none text-emerald-300">
               保存すると生成に使われます
             </span>
+            {matched ? (
+              <span className="rounded-full border border-primary/30 bg-primary/10 px-2 py-1 text-[11px] font-medium leading-none text-primary">
+                検索一致
+              </span>
+            ) : null}
           </div>
           <SettingExplanation
             effect={effect}
@@ -207,6 +216,7 @@ function NumberSetting({
   guidance,
   id,
   label,
+  matched = false,
   max,
   min,
   onChange,
@@ -221,8 +231,8 @@ function NumberSetting({
 
   return (
     <div className="rounded-xl border border-border/70 bg-card/60 p-3">
-      <div className="flex items-start justify-between gap-2">
-        <div>
+      <div className="flex min-w-0 items-start justify-between gap-2">
+        <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <p className="text-sm font-medium leading-6 text-foreground">
               {number}. {label}
@@ -230,6 +240,11 @@ function NumberSetting({
             <span className="rounded-full border border-emerald-400/35 bg-emerald-400/10 px-2 py-1 text-[11px] font-medium leading-none text-emerald-300">
               保存すると生成に使われます
             </span>
+            {matched ? (
+              <span className="rounded-full border border-primary/30 bg-primary/10 px-2 py-1 text-[11px] font-medium leading-none text-primary">
+                検索一致
+              </span>
+            ) : null}
           </div>
           <SettingExplanation
             effect={effect}
@@ -289,20 +304,27 @@ function NumberSetting({
 function FixedSettingRow({
   detail,
   label,
+  matched = false,
   number,
   value,
 }: {
   detail: string;
   label: string;
+  matched?: boolean;
   number: string;
   value: string;
 }) {
   return (
-    <div className="flex items-start justify-between gap-3 rounded-xl border border-blue-400/25 bg-blue-400/5 px-3 py-2">
-      <div>
-        <p className="text-sm font-medium leading-6 text-foreground">
+    <div className="flex min-w-0 flex-col gap-3 rounded-xl border border-blue-400/25 bg-blue-400/5 px-3 py-2 sm:flex-row sm:items-start sm:justify-between">
+      <div className="min-w-0">
+        <p className="break-words text-sm font-medium leading-6 text-foreground [overflow-wrap:anywhere]">
           {number}. {label}
         </p>
+        {matched ? (
+          <span className="mt-1 inline-flex rounded-full border border-primary/30 bg-primary/10 px-2 py-1 text-[11px] font-medium leading-none text-primary">
+            検索一致
+          </span>
+        ) : null}
         <dl className="mt-1 grid gap-1 text-xs leading-5 text-muted-foreground">
           <div>
             <dt className="inline font-medium text-foreground">これは何？ </dt>
@@ -328,8 +350,8 @@ function FixedSettingRow({
           </div>
         </dl>
       </div>
-      <div className="flex shrink-0 flex-col items-end gap-1">
-        <span className="rounded-full border border-border/70 bg-background px-2 py-1 text-xs text-muted-foreground">
+      <div className="flex min-w-0 flex-col items-start gap-1 sm:shrink-0 sm:items-end">
+        <span className="max-w-full break-words rounded-full border border-border/70 bg-background px-2 py-1 text-xs text-muted-foreground [overflow-wrap:anywhere]">
           {value}
         </span>
         <span className="text-[11px] text-blue-300">ここでは変更不可</span>
@@ -413,6 +435,7 @@ export function ResponsesSettingsSection({
   dirty,
   draftSettings,
   fieldErrors,
+  matchedSubcategoryIds,
   onDiscard,
   onDraftSettingsChange,
   onSave,
@@ -493,6 +516,9 @@ export function ResponsesSettingsSection({
           error={fieldErrors.developerInstructions}
           guidance="このチャット全体でAIに必ず守らせたい方針があるときに使います。"
           id="response-developer-instructions"
+          matched={matchedSubcategoryIds?.has(
+            "responses-developer-instructions",
+          )}
           label="Developer instructions / 開発者指示"
           number="1-1"
           onChange={(developerInstructions) =>
@@ -509,6 +535,9 @@ export function ResponsesSettingsSection({
           error={fieldErrors.customUserInstructions}
           guidance="回答の長さ、口調、前提条件などを毎回指定したいときに使います。"
           id="response-custom-user-instructions"
+          matched={matchedSubcategoryIds?.has(
+            "responses-custom-user-instructions",
+          )}
           label="Custom user instructions / カスタム指示"
           number="1-2"
           onChange={(customUserInstructions) =>
@@ -526,6 +555,7 @@ export function ResponsesSettingsSection({
           error={fieldErrors.maxOutputTokens}
           guidance="回答が長すぎる、または長い回答を許可したいときだけ指定します。"
           id="response-max-output-tokens"
+          matched={matchedSubcategoryIds?.has("responses-max-output-tokens")}
           label="max_output_tokens / 最大出力トークン"
           max={MAX_MAX_OUTPUT_TOKENS}
           min={MIN_MAX_OUTPUT_TOKENS}
@@ -551,6 +581,7 @@ export function ResponsesSettingsSection({
           error={fieldErrors.temperature}
           guidance="回答が毎回ぶれすぎる、または創作的に広げたいときだけ指定します。"
           id="response-temperature"
+          matched={matchedSubcategoryIds?.has("responses-temperature")}
           label="temperature / 温度サンプリング"
           max={MAX_TEMPERATURE}
           min={MIN_TEMPERATURE}
@@ -574,6 +605,7 @@ export function ResponsesSettingsSection({
           error={fieldErrors.topP}
           guidance="候補の選び方を細かく調整したい場合だけ指定します。"
           id="response-top-p"
+          matched={matchedSubcategoryIds?.has("responses-top-p")}
           label="top_p / 候補範囲"
           max={MAX_TOP_P}
           min={MIN_TOP_P}
@@ -599,24 +631,28 @@ export function ResponsesSettingsSection({
         <FixedSettingRow
           detail="チャット下部の入力欄から送信されます。この設定画面内では編集しません。"
           label="Current user message / 通常メッセージ"
+          matched={matchedSubcategoryIds?.has("responses-current-user-message")}
           number="1-3"
           value="チャット下部"
         />
         <FixedSettingRow
           detail="保存済みの会話履歴から自動で用意されます。ここでは変更できません。"
           label="Conversation history / 会話履歴"
+          matched={matchedSubcategoryIds?.has("responses-conversation-history")}
           number="1-4"
           value="自動"
         />
         <FixedSettingRow
           detail="現在選ばれている回答候補だけが会話履歴に使われます。"
           label="Assistant history / アシスタント履歴"
+          matched={matchedSubcategoryIds?.has("responses-assistant-history")}
           number="1-5"
           value="選択中のみ"
         />
         <FixedSettingRow
           detail="画面上部で選択した4oモデルを使います。"
           label="model / モデル"
+          matched={matchedSubcategoryIds?.has("responses-model")}
           number="1-6"
           value={selectedSnapshot}
         />
@@ -629,24 +665,28 @@ export function ResponsesSettingsSection({
         <FixedSettingRow
           detail="OpenAI側には会話を保存せず、4oSphere側で管理します。"
           label="store / OpenAI側保存"
+          matched={matchedSubcategoryIds?.has("responses-store")}
           number="1-10"
           value="false固定"
         />
         <FixedSettingRow
           detail="現在は回答が完成してからまとめて表示されます。少しずつ表示する方式には変更できません。"
           label="stream / ストリーミング"
+          matched={matchedSubcategoryIds?.has("responses-stream")}
           number="1-11"
           value="false固定"
         />
         <FixedSettingRow
           detail="検索・ファイル参照・関数実行などの追加機能は、まだ使いません。"
           label="tools / ツール"
+          matched={matchedSubcategoryIds?.has("responses-tools")}
           number="1-12"
           value="なし"
         />
         <FixedSettingRow
           detail="追加機能を使わないため、ツール選択も「使わない」に固定されています。"
           label="tool_choice / ツール選択"
+          matched={matchedSubcategoryIds?.has("responses-tool-choice")}
           number="1-13"
           value="使わない"
         />

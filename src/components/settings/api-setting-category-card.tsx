@@ -23,20 +23,24 @@ type ApiSettingCategoryCardProps = {
   category: ApiSettingCategory;
   children?: ReactNode;
   collapsed: boolean;
+  matchingSubcategoryCount: number;
   onToggle: () => void;
+  searchOrFilterActive: boolean;
 };
 
 export function ApiSettingCategoryCard({
   category,
   children,
   collapsed,
+  matchingSubcategoryCount,
   onToggle,
+  searchOrFilterActive,
 }: ApiSettingCategoryCardProps) {
   const contentId = `settings-category-${category.id}-content`;
 
   return (
     <article className="rounded-2xl border border-border/70 bg-card/70 shadow-sm shadow-black/10">
-      <div className="flex items-start gap-2 p-3">
+      <div className="flex flex-wrap items-start gap-2 p-3">
         <button
           aria-controls={contentId}
           aria-expanded={!collapsed}
@@ -70,6 +74,13 @@ export function ApiSettingCategoryCard({
         >
           {API_SETTING_STATUS_LABELS[category.status]}
         </span>
+        {searchOrFilterActive ? (
+          <span className="shrink-0 rounded-full border border-primary/30 bg-primary/10 px-2 py-1 text-[11px] font-medium leading-none text-primary">
+            {matchingSubcategoryCount
+              ? `子設定 ${matchingSubcategoryCount}件一致${collapsed ? "・開いて確認" : ""}`
+              : "親カテゴリが一致"}
+          </span>
+        ) : null}
         <SettingsHelpPopover
           detailDescription={category.detailDescription}
           label={category.displayName}
@@ -77,7 +88,7 @@ export function ApiSettingCategoryCard({
         />
       </div>
       <div className="px-3 pb-3">
-        <p className="text-sm leading-6 text-muted-foreground">
+        <p className="break-words text-sm leading-6 text-muted-foreground">
           {category.shortDescription}
         </p>
         {!collapsed ? (
@@ -97,11 +108,17 @@ export function ApiSettingCategoryCard({
               <p className="mt-3 leading-5">{category.detailDescription}</p>
               <dl className="mt-3 grid gap-2 sm:grid-cols-[7rem_1fr]">
                 <dt className="font-medium text-foreground">officialPath</dt>
-                <dd>{category.officialPath}</dd>
+                <dd className="break-words [overflow-wrap:anywhere]">
+                  {category.officialPath}
+                </dd>
                 <dt className="font-medium text-foreground">phase</dt>
-                <dd>{category.phase}</dd>
+                <dd className="break-words [overflow-wrap:anywhere]">
+                  {category.phase}
+                </dd>
                 <dt className="font-medium text-foreground">notes</dt>
-                <dd>{category.notes}</dd>
+                <dd className="break-words [overflow-wrap:anywhere]">
+                  {category.notes}
+                </dd>
               </dl>
             </details>
           </div>
